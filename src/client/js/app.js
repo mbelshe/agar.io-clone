@@ -158,7 +158,7 @@ function setupSocket(socket) {
     // Handle ping.
     socket.on('pong', function () {
         var latency = Date.now() - global.startPingTime;
-        debug('Latency: ' + latency + 'ms');
+        debug('Latency: ' + latency/1000 + 's');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
     });
 
@@ -214,6 +214,8 @@ function setupSocket(socket) {
     socket.on('leaderboard', function (data) {
         leaderboard = data.leaderboard;
         var status = '<span class="title">Leaderboard</span>';
+        status += '<br  />';
+        status += '<span class ="me">' + 'Number of Players: ' + users.length;
         for (var i = 0; i < leaderboard.length; i++) {
             status += '<br />';
             var spanclass = '';
@@ -228,6 +230,7 @@ function setupSocket(socket) {
             status += '<span class="' + spanclass + '">' + (i + 1) + '. ' + name + '</span>'; 
         }
         status += '<br />Players: ' + data.players;
+
         document.getElementById('status').innerHTML = status;
     });
 
