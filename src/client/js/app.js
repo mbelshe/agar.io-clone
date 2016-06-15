@@ -215,7 +215,7 @@ function setupSocket(socket) {
         leaderboard = data.leaderboard;
         var status = '<span class="title">Leaderboard</span>';
         status += '<br  />';
-        status += '<span class ="me">' + 'Number of Players: ' + users.length();
+        status += '<span class ="me">' + 'Number of Players: ' + users.length;
         for (var i = 0; i < leaderboard.length; i++) {
             status += '<br />';
             if (leaderboard[i].id == player.id){
