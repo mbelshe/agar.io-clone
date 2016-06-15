@@ -157,7 +157,6 @@ $( "#split" ).click(function() {
 function setupSocket(socket) {
     // Handle ping.
     socket.on('pong', function () {
-console.log('startpingtime: ' + startPingTime);
         var latency = Date.now() - global.startPingTime;
         debug('Latency: ' + latency + 'ms');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
@@ -214,7 +213,6 @@ console.log('startpingtime: ' + startPingTime);
 
     socket.on('leaderboard', function (data) {
         leaderboard = data.leaderboard;
-console.log(data);
         var status = '<span class="title">Leaderboard</span>';
         for (var i = 0; i < leaderboard.length; i++) {
             status += '<br />';
