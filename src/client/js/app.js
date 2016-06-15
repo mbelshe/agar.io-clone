@@ -157,6 +157,7 @@ $( "#split" ).click(function() {
 function setupSocket(socket) {
     // Handle ping.
     socket.on('pong', function () {
+console.log('startpingtime: ' + startPingTime);
         var latency = Date.now() - global.startPingTime;
         debug('Latency: ' + latency + 'ms');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
@@ -213,22 +214,22 @@ function setupSocket(socket) {
 
     socket.on('leaderboard', function (data) {
         leaderboard = data.leaderboard;
+console.log(data);
         var status = '<span class="title">Leaderboard</span>';
         for (var i = 0; i < leaderboard.length; i++) {
             status += '<br />';
-            if (leaderboard[i].id == player.id){
-                if(leaderboard[i].name.length !== 0)
-                    status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
-                else
-                    status += '<span class="me">' + (i + 1) + ". An unnamed cell</span>";
-            } else {
-                if(leaderboard[i].name.length !== 0)
-                    status += (i + 1) + '. ' + leaderboard[i].name;
-                else
-                    status += (i + 1) + '. An unnamed cell';
+            var spanclass = '';
+            if (leaderboard[i].id == player.id) {
+                spanclass ='me';
             }
+            var name = 'An unnamed cell';
+            if(leaderboard[i].name.length !== 0) {
+                name = leaderboard[i].name;
+            }
+            name += ' (' + leaderboard[i].size + ')';
+            status += '<span class="' + spanclass + '">' + (i + 1) + '. ' + name + '</span>'; 
         }
-        //status += '<br />Players: ' + data.players;
+        status += '<br />Players: ' + data.players;
         document.getElementById('status').innerHTML = status;
     });
 
