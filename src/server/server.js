@@ -593,11 +593,14 @@ function gameloop() {
 
         var topUsers = [];
 
+        // TODO(mike): looks like a bug here; only enumerating first 10 users.
+        //             shouldn't leaderboard come from any of the top users?
         for (var i = 0; i < Math.min(10, users.length); i++) {
             if(users[i].type == 'player') {
                 topUsers.push({
                     id: users[i].id,
-                    name: users[i].name
+                    name: users[i].name,
+                    size: users[i].massTotal
                 });
             }
         }
