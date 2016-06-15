@@ -158,7 +158,7 @@ function setupSocket(socket) {
     // Handle ping.
     socket.on('pong', function () {
         var latency = Date.now() - global.startPingTime;
-        debug('Latency: ' + latency + 'ms');
+        debug('Latency: ' + latency/1000 + 's');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
     });
 
