@@ -121,7 +121,6 @@ var foods = [];
 var viruses = [];
 var fireFood = [];
 var users = [];
-var leaderboard = [];
 var target = {x: player.x, y: player.y};
 global.target = target;
 
@@ -155,10 +154,10 @@ $( "#split" ).click(function() {
 
 // socket stuff.
 function setupSocket(socket) {
-    // Handle ping.
-    socket.on('pong', function () {
+    // Handle ping response.
+    socket.on('internalPong', function () {
         var latency = Date.now() - global.startPingTime;
-        debug('Latency: ' + latency/1000 + 's');
+        debug('Latency: ' + latency + 'ms');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
     });
 
@@ -212,7 +211,7 @@ function setupSocket(socket) {
     });
 
     socket.on('leaderboard', function (data) {
-        leaderboard = data.leaderboard;
+        var leaderboard = data.leaderboard;
         var status = '<span class="title">Leaderboard</span>';
         status += '<br  />';
         status += '<span class ="me">' + 'Number of Players: ' + users.length;

@@ -298,8 +298,9 @@ io.on('connection', function (socket) {
 
     });
 
-    socket.on('ping', function () {
-        socket.emit('pong');
+    socket.on('internalPing', function () {
+        console.log('[INFO] Got ping request for player: ' + currentPlayer.name);
+        socket.emit('internalPong');
     });
 
     socket.on('windowResized', function (data) {
@@ -593,8 +594,7 @@ function gameloop() {
 
         var topUsers = [];
 
-        // TODO(mike): looks like a bug here; only enumerating first 10 users.
-        //             shouldn't leaderboard come from any of the top users?
+        // Users is sorted by massTotal.  Leaderboard is up to the top 10 of them.
         for (var i = 0; i < Math.min(10, users.length); i++) {
             if(users[i].type == 'player') {
                 topUsers.push({
