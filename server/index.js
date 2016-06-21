@@ -212,8 +212,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('ping', () => {
-    socket.emit('pong');
+  socket.on('gamePing', () => {
+    socket.emit('gamePong');
   });
 
   socket.on('windowResized', (data) => {
