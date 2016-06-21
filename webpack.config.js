@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use strict';
 
 var path = require('path');
@@ -45,4 +46,22 @@ module.exports = {
       loader: 'file?name=[path][name].[ext]'
     }]
   }
+=======
+module.exports = {
+    entry: "./src/client/js/app.js",
+    output: {
+        path: require("path").resolve("./src/bin/client/js"),
+        library: "app",
+        filename: "app.js"
+    },
+    module: {
+        loaders: [
+            {
+                test: /\.jsx?$/,
+                exclude: /(node_modules|bower_components)/,
+                loader: 'babel'
+            }
+        ]
+    }
+>>>>>>> 23a2ceb208121a477b4717f71571dd1ed0fe1f24
 };

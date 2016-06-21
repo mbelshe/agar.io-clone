@@ -38,7 +38,11 @@ You can check out how to play on our [wiki](https://github.com/huytd/agar.io-clo
 - Mobile optimisation.
 - Implementation of working viruses.
 - Display player name.
+<<<<<<< HEAD
 - Now supporting chat.
+=======
+- Now supporting chat. 
+>>>>>>> 23a2ceb208121a477b4717f71571dd1ed0fe1f24
 - Type`-ping` in the chatbox to check your ping, as well as other commands!
 
 ---
@@ -54,7 +58,11 @@ Or...
 >You can check out a more detailed setup tutorial on our [wiki](https://github.com/huytd/agar.io-clone/wiki/Setup).
 
 #### Requirements
+<<<<<<< HEAD
 To run / install this game, you'll need:
+=======
+To run / install this game, you'll need: 
+>>>>>>> 23a2ceb208121a477b4717f71571dd1ed0fe1f24
 - NodeJS with NPM installed.
 - socket.IO.
 - Express.
@@ -86,6 +94,7 @@ The game will then be accessible at `http://localhost:3000` or the respective se
 2. **Why would you make a clone of this game?**
 
   Well, while the original game is still online, it is closed-source, and sometimes, it suffers from massive lag. That's why we want to make an open source version of it: for educational purposes, and to let the community add the features that they want, self-host it on their own servers, have fun with friends and more.
+<<<<<<< HEAD
 
 3. **Any plans on adding an online server to compete with Agar.IO or making money out of it?**
 
@@ -99,6 +108,21 @@ The game will then be accessible at `http://localhost:3000` or the respective se
 
   Of course! As long as your client supports WebSockets, you can write your game client in any language/technology, even with Unity3D if you want (there is an open source library for Unity to communicate with WebSockets)!
 
+=======
+  
+3. **Any plans on adding an online server to compete with Agar.IO or making money out of it?**
+
+  No. This game belongs to the open-source community, and we have no plans on making money out of it nor competing with anything. But you can of course create your own public server, let us know if you do so and we can add it to our Live Demos list!
+  
+4. **Can I deploy this game to my own server?**
+
+  Sure you can! That's what it's made for! ;)
+  
+5. **I don't like HTML5 canvas. Can I write my own game client with this server?**
+
+  Of course! As long as your client supports WebSockets, you can write your game client in any language/technology, even with Unity3D if you want (there is an open source library for Unity to communicate with WebSockets)!
+  
+>>>>>>> 23a2ceb208121a477b4717f71571dd1ed0fe1f24
 6. **Can I use some code of this project on my own?**
 
   Yes you can.
