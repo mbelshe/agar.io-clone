@@ -206,7 +206,7 @@ const chat = new ChatClient();
 // socket stuff.
 function setupSocket() {
   // Handle ping.
-  socket.on('pong', () => {
+  socket.on('gamePong', () => {
     const latency = Date.now() - startPingTime;
     debug(`Latency: ${latency}ms`);
     chat.addSystemLine(`Ping: ${latency}ms`);
@@ -823,7 +823,7 @@ function directionUp(event) {
 function checkLatency() {
   // Ping.
   startPingTime = Date.now();
-  socket.emit('ping');
+  socket.emit('gamePing');
 }
 
 function toggleDarkMode() {
