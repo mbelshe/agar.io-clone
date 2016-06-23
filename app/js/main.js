@@ -9,7 +9,7 @@ import '../audio/split.mp3';
 import io from 'socket.io-client';
 
 let playerName;
-let playerType;
+let playerType;  // either 'player' | 'spectate'
 const playerNameInput = document.getElementById('playerNameInput');
 let socket;
 let reason;
@@ -70,11 +70,7 @@ let player = {
   target: {x: screenWidth / 2, y: screenHeight / 2}
 };
 
-let foods = [];
-let viruses = [];
-let fireFood = [];
-let bots = [];
-let users = [];
+let gameObjects = [];
 let leaderboard = [];
 let target = {x: player.x, y: player.y};
 let reenviar = true;
@@ -226,6 +222,7 @@ function setupSocket() {
   // Handle connection.
   socket.on('welcome', (playerSettings) => {
     player = playerSettings;
+    player.id = playerSettings.id;
     player.name = playerName;
     player.w = screenWidth;
     player.h = screenHeight;
@@ -294,12 +291,12 @@ function setupSocket() {
   });
 
   // Handle movement.
-  socket.on('serverTellPlayerMove', (userData, foodsList, massList, virusList, botsList) => {
+  socket.on('serverTellPlayerMove', (viewableObjects) => {
     let playerData = {};
-    for (let i = 0; i < userData.length; i++) {
-      if (typeof(userData[i].id) === 'undefined') {
-        playerData = userData[i];
-        i = userData.length;
+    for (let i = 0; i < viewableObjects.length; i++) {
+      if (viewableObjects[i].id === player.id) {
+        playerData = viewableObjects[i];
+        break;
       }
     }
     if (playerType === 'player') {
@@ -314,11 +311,7 @@ function setupSocket() {
       player.xoffset = isNaN(xoffset) ? 0 : xoffset;
       player.yoffset = isNaN(yoffset) ? 0 : yoffset;
     }
-    users = userData;
-    foods = foodsList;
-    viruses = virusList;
-    bots = botsList;
-    fireFood = massList;
+    gameObjects = viewableObjects;
   });
 
   // Death.
@@ -529,6 +522,17 @@ function drawPlayers(order) {
   }
 }
 
+// drawGameObject
+// Draw's a single game object based on type.  In the future we can make this more object oriented.
+function drawGameObject(obj) {
+  console.log('drawGameObject');
+  console.dir(obj);
+
+  if (obj.type == 'player') {
+    obj.cells.forEach(drawCell);
+  } 
+}
+
 function drawborder() {
   graph.lineWidth = 1;
   graph.strokeStyle = playerConfig.borderColor;
@@ -582,14 +586,19 @@ function gameLoop() {
     if (gameStart) {
       graph.clearRect(0, 0, screenWidth, screenHeight);
       document.body.style.backgroundPosition = `${xoffset - player.x}px ${yoffset - player.y}px`;
-      foods.forEach(drawFood);
-      fireFood.forEach(drawFireFood);
-      viruses.forEach(drawVirus);
-      bots.forEach(drawBots);
+      //foods.forEach(drawFood);
+      //fireFood.forEach(drawFireFood);
+      //viruses.forEach(drawVirus);
+      //bots.forEach(drawBots);
 
       if (borderDraw) {
         drawborder();
       }
+
+      gameObjects.forEach(drawGameObject);
+
+/*
+      // Sort the users in order to display larger users "on top" of smaller users as they get eaten
       const orderMass = [];
       for (let i = 0; i < users.length; i++) {
         for (let j = 0; j < users[i].cells.length; j++) {
@@ -605,6 +614,7 @@ function gameLoop() {
       });
 
       drawPlayers(orderMass);
+*/
       socket.emit('0', target); // playerSendTarget "Heartbeat".
     } else {
       graph.fillStyle = '#333333';

@@ -5,6 +5,7 @@ import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from '../webpack.config.js';
 import Player from './player';
+import GameBoard from './gameBoard';
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
 const app = express();
@@ -33,19 +34,19 @@ import IO from 'socket.io';
 import SAT from 'sat';
 import Config from '../config.json';
 import Util from './lib/util';
-import SimpleQuadTree from 'simple-quadtree';
 
 const http = (Http).Server(app);
 const io = (IO)(http);
 
-// TODO: GET THIS WORKING
-const sqt = SimpleQuadTree(0, 0, Config.gameWidth, Config.gameHeight)
+const gameBoard = new GameBoard();
 
+/*
 const users = [];
 const massFood = [];
 const food = [];
 const virus = [];
 const bots = [];
+*/
 const sockets = {};
 
 let leaderboard = [];
@@ -54,6 +55,7 @@ let leaderboardChanged = false;
 const V = SAT.Vector;
 const C = SAT.Circle;
 
+/*
 function addFood(add) {
   const radius = Util.massToRadius(Config.foodMass);
   let toAdd = add;
@@ -96,6 +98,7 @@ function addBot(add) {
     const radius = Util.massToRadius(Config.defaultPlayerMass);
     const position = Util.randomPosition(radius);
     const bot = new Player(((new Date()).getTime() + '' + bots.length) >>> 0, `Bot ${toAdd}`, position, 'bot', 6.25);
+    // TODO:  need to add bot to gameboard
     bot.radius = radius;
     bot.target.directionX = 'left' || 'right';
     bot.target.directionY = 'up' || 'down';
@@ -176,19 +179,21 @@ function balanceMass() {
     }
   }
 }
+*/
 
 io.on('connection', (socket) => {
   console.log('A user connected!', socket.handshake.query.type);
 
   const type = socket.handshake.query.type;
   let radius = Util.massToRadius(Config.defaultPlayerMass);
-  let position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(users, radius) : Util.randomPosition(radius);
+  let position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(gameBoard.objects, radius) : Util.randomPosition(radius);
+console.log("ADDING PLAYER -- " + socket.id);
   let currentPlayer = new Player(socket.id, '', position, type);
 
   socket.on('gotit', (player) => {
     console.log(`[INFO] Player ${player.name} connecting!`);
 
-    if (Util.findIndex(users, player.id) > -1) {
+    if (gameBoard.findObjectById(player.id)) {
       console.log('[INFO] Player ID is already connected, kicking.');
       socket.disconnect();
     } else if (!Util.validNick(player.name)) {
@@ -199,9 +204,9 @@ io.on('connection', (socket) => {
       sockets[player.id] = socket;
 
       radius = Util.massToRadius(Config.defaultPlayerMass);
-      position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(users, radius) : Util.randomPosition(radius);
+      position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(gameBoard.objects, radius) : Util.randomPosition(radius);
       currentPlayer = new Player(player.id, player.name, position, type);
-      users.push(currentPlayer);
+      gameBoard.insert(currentPlayer);
 
       io.emit('playerJoin', { name: currentPlayer.name });
 
@@ -221,16 +226,16 @@ io.on('connection', (socket) => {
   });
 
   socket.on('respawn', () => {
-    if (Util.findIndex(users, currentPlayer.id) > -1) {
-      users.splice(Util.findIndex(users, currentPlayer.id), 1);
+    if (gameBoard.findObjectById(currentPlayer.id)) {
+      gameBoard.remove(currentPlayer.id);
     }
     socket.emit('welcome', currentPlayer);
     console.log(`[INFO] User ${currentPlayer.name} respawned!`);
   });
 
   socket.on('disconnect', () => {
-    if (Util.findIndex(users, currentPlayer.id) > -1) {
-      users.splice(Util.findIndex(users, currentPlayer.id), 1);
+    if (gameBoard.findObjectById(currentPlayer.id)) {
+      gameBoard.remove(currentPlayer.id);
     }
     console.log(`[INFO] User ${currentPlayer.name} disconnected!`);
     socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
@@ -259,6 +264,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('kick', (data) => {
+/*
     if (currentPlayer.admin) {
       const [name, ...reasons] = data;
       let reason = '';
@@ -285,6 +291,7 @@ io.on('connection', (socket) => {
       console.log(`[ADMIN] ${currentPlayer.name} is trying to use -kick but isn't an admin.`);
       socket.emit('serverMSG', 'You are not permitted to use this command.');
     }
+*/
   });
 
   // Heartbeat function, update everytime.
@@ -352,6 +359,7 @@ function tickPlayer(currentPlayer) {
     sockets[currentPlayer.id].disconnect();
   }
 
+/*
   moveBot();
   currentPlayer.move();
 
@@ -394,7 +402,8 @@ function tickPlayer(currentPlayer) {
 
   function check(user) {
     user.cells.forEach((c, i) => {
-      if (/* user.cells[i].mass > 10 && */ user.id !== currentPlayer.id) {
+      //if ( user.cells[i].mass > 10 && user.id !== currentPlayer.id) {
+      if (user.id !== currentPlayer.id) {
         const response = new SAT.Response();
         const collided = SAT.testCircleCircle(playerCircle,
           new C(new V(c.x, c.y), c.radius),
@@ -480,26 +489,31 @@ function tickPlayer(currentPlayer) {
     sockets[currentPlayer.id].emit('playerScore', currentPlayer.score);
     currentCell.radius = Util.massToRadius(currentCell.mass);
     playerCircle.r = currentCell.radius;
-    sqt.clear();
 
     users.forEach(sqt.put);
     bots.forEach(sqt.put);
-
-
     // TODO: TEST TO MAKE SURE PLAYER COLLISSIONS WORK
     sqt.get(currentPlayer, check);
-
     playerCollisions.forEach(collisionCheck);
   }
+*/
 }
 
-function moveloop() {
-  users.forEach(u => tickPlayer(u));
+function moveLoop() {
+  gameBoard.objects.forEach((u) => {
+    if (u.type == 'player') {
+      tickPlayer(u);
+    }
+  });
+
+  /*
   massFood.filter(m => m.speed > 0)
     .forEach(m => moveMass(m));
+  */
 }
 
-function gameloop() {
+function gameLoop() {
+/*
   if (users.length > 0) {
     users.sort((a, b) => { return b.massTotal - a.massTotal; });
 
@@ -525,6 +539,7 @@ function gameloop() {
         }
       }
     }
+
     users.forEach(u => {
       u.cells.forEach(c => {
         if (c.mass * (1 - (Config.massLossRate / 1000)) > Config.defaultPlayerMass && u.massTotal > Config.minMassLoss) {
@@ -535,12 +550,17 @@ function gameloop() {
       });
     });
   }
+
   balanceMass();
+*/
 }
 
 function sendUpdates() {
-  users.forEach((u) => {
-    if (u.type === 'player') {
+  gameBoard.objects.forEach(function(object) {
+console.dir(object);
+console.log("--sendUpdates loop for: " + object.id + "," + object.type);
+    if (object.type === 'player') {
+/*
       // center the view if x/y is undefined, this will happen for spectators
       u.x = u.x || Config.gameWidth / 2;
       u.y = u.y || Config.gameHeight / 2;
@@ -593,9 +613,12 @@ function sendUpdates() {
             name: f.name
           };
         });
-      sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus, visibleBots);
+*/
+      let visibleObjects = gameBoard.find({x: object.x - object.w/2, y: object.y - object.h/2, w: object.w, h: object.h});
+console.dir(visibleObjects);
+      sockets[object.id].emit('serverTellPlayerMove', visibleObjects);
       if (leaderboardChanged) {
-        sockets[u.id].emit('leaderboard', {
+        sockets[object.id].emit('leaderboard', {
           players: users.length,
           leaderboard: leaderboard
         });
@@ -605,8 +628,8 @@ function sendUpdates() {
   leaderboardChanged = false;
 }
 
-setInterval(moveloop, 1000 / 60);
-setInterval(gameloop, 1000);
+setInterval(moveLoop, 1000 / 60);
+setInterval(gameLoop, 1000);
 setInterval(sendUpdates, 1000 / Config.networkUpdateFactor);
 
 // Don't touch, IP configurations.
