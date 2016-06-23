@@ -428,24 +428,21 @@ function valueInRange(min, max, value) {
   return Math.min(max, Math.max(min, value));
 }
 
-function drawPlayers(order) {
+function drawPlayer(playerToDraw) {
   const start = {
     x: player.x - (screenWidth / 2),
     y: player.y - (screenHeight / 2)
   };
 
-  for (let z = 0; z < order.length; z++) {
-    const userCurrent = users[order[z].nCell];
-    const cellCurrent = users[order[z].nCell].cells[order[z].nDiv];
-
+  playerToDraw.cells.forEach(function(cell) {
     let x = 0;
     let y = 0;
 
-    const points = 30 + ~~(cellCurrent.mass / 5);
+    const points = 30 + ~~(cell.mass / 5);
     const increase = Math.PI * 2 / points;
 
-    graph.strokeStyle = `hsl(${userCurrent.hue}, 100%, 45%)`;
-    graph.fillStyle = `hsl(${userCurrent.hue}, 100%, 50%)`;
+    graph.strokeStyle = `hsl(${playerToDraw.hue}, 100%, 45%)`;
+    graph.fillStyle = `hsl(${playerToDraw.hue}, 100%, 50%)`;
     graph.lineWidth = playerConfig.border;
 
     const xstore = [];
@@ -454,19 +451,19 @@ function drawPlayers(order) {
     spin += 0.0;
 
     const circle = {
-      x: cellCurrent.x - start.x,
-      y: cellCurrent.y - start.y
+      x: cell.x - start.x,
+      y: cell.y - start.y
     };
 
     for (let i = 0; i < points; i++) {
-      x = cellCurrent.radius * Math.cos(spin) + circle.x;
-      y = cellCurrent.radius * Math.sin(spin) + circle.y;
-      if (typeof(userCurrent.id) === 'undefined') {
-        x = valueInRange(-userCurrent.x + screenWidth / 2, gameWidth - userCurrent.x + screenWidth / 2, x);
-        y = valueInRange(-userCurrent.y + screenHeight / 2, gameHeight - userCurrent.y + screenHeight / 2, y);
+      x = cell.radius * Math.cos(spin) + circle.x;
+      y = cell.radius * Math.sin(spin) + circle.y;
+      if (playerToDraw.id === player.id) {
+        x = valueInRange(-playerToDraw.x + screenWidth / 2, gameWidth - playerToDraw.x + screenWidth / 2, x);
+        y = valueInRange(-playerToDraw.y + screenHeight / 2, gameHeight - playerToDraw.y + screenHeight / 2, y);
       } else {
-        x = valueInRange(-cellCurrent.x - player.x + screenWidth / 2 + (cellCurrent.radius / 3), gameWidth - cellCurrent.x + gameWidth - player.x + screenWidth / 2 - (cellCurrent.radius / 3), x);
-        y = valueInRange(-cellCurrent.y - player.y + screenHeight / 2 + (cellCurrent.radius / 3), gameHeight - cellCurrent.y + gameHeight - player.y + screenHeight / 2 - (cellCurrent.radius / 3), y);
+        x = valueInRange(-cell.x - player.x + screenWidth / 2 + (cell.radius / 3), gameWidth - cell.x + gameWidth - player.x + screenWidth / 2 - (cell.radius / 3), x);
+        y = valueInRange(-cell.y - player.y + screenHeight / 2 + (cell.radius / 3), gameHeight - cell.y + gameHeight - player.y + screenHeight / 2 - (cell.radius / 3), y);
       }
       spin += increase;
       xstore[i] = x;
@@ -492,13 +489,13 @@ function drawPlayers(order) {
     graph.fill();
     graph.stroke();
     let nameCell = '';
-    if (typeof(userCurrent.id) === 'undefined') {
+    if (playerToDraw.id === player.id) {
       nameCell = player.name;
     } else {
-      nameCell = userCurrent.name;
+      nameCell = playerToDraw.name;
     }
 
-    let fontSize = Math.max(cellCurrent.radius / 3, 12);
+    let fontSize = Math.max(cell.radius / 3, 12);
     graph.lineWidth = playerConfig.textBorderSize;
     graph.fillStyle = playerConfig.textColor;
     graph.strokeStyle = playerConfig.textBorder;
@@ -516,10 +513,10 @@ function drawPlayers(order) {
       graph.fillText(nameCell, circle.x, circle.y);
       graph.font = `bold ${Math.max(fontSize / 3 * 2, 10)}px sans-serif`;
       if (nameCell.length === 0) fontSize = 0;
-      graph.strokeText(Math.round(cellCurrent.mass), circle.x, circle.y + fontSize);
-      graph.fillText(Math.round(cellCurrent.mass), circle.x, circle.y + fontSize);
+      graph.strokeText(Math.round(cell.mass), circle.x, circle.y + fontSize);
+      graph.fillText(Math.round(cell.mass), circle.x, circle.y + fontSize);
     }
-  }
+  });
 }
 
 // drawGameObject
@@ -529,7 +526,7 @@ function drawGameObject(obj) {
   console.dir(obj);
 
   if (obj.type == 'player') {
-    obj.cells.forEach(drawCell);
+    drawPlayer(obj);
   } 
 }
 
