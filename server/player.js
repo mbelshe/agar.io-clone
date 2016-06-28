@@ -14,6 +14,10 @@ class Player extends GameObject {
     this.name = name;
     this.type = type;
 
+    if (!speed) {
+      speed = Config.initialSpeed;
+    }
+
     this.radius = Util.massToRadius(Config.defaultPlayerMass);
     this.cells = [{
       mass: Config.defaultPlayerMass,
