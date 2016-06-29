@@ -126,6 +126,10 @@ if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
 const c = document.getElementById('cvs');
 const graph = c.getContext('2d');
 
+function isCurrentPlayer(id) {
+  return id === player.id;
+}
+
 function ChatClient() {
   this.commands = {};
   let input = document.getElementById('chatInput');
@@ -308,7 +312,7 @@ function setupSocket() {
     let status = '<span class="title">Leaderboard</span>';
     for (let i = 0; i < leaderboard.length; i++) {
       status += '<br />';
-      if (leaderboard[i].id === player.id) {
+      if (isCurrentPlayer(leaderboard[i].id)) {
         status += leaderboard[i].name.length !== 0 ? `<span class="me">${(i + 1)}. ${leaderboard[i].name}</span>` : `<span class="me">${(i + 1)}. An unnamed cell</span>`;
       } else {
         status += leaderboard[i].name.length !== 0 ? `${(i + 1)}. ${leaderboard[i].name}` : `${(i + 1)}. An unnamed cell`;
@@ -331,7 +335,7 @@ function setupSocket() {
   socket.on(GameEvents.serverTellPlayerMove, (viewableObjects) => {
     let playerData = {};
     for (let i = 0; i < viewableObjects.length; i++) {
-      if (viewableObjects[i].id === player.id) {
+      if (isCurrentPlayer(viewableObjects[i].id)) {
         playerData = viewableObjects[i];
         break;
       }
@@ -495,7 +499,7 @@ function drawPlayer(playerToDraw) {
     for (let i = 0; i < points; i++) {
       x = cell.radius * Math.cos(spin) + circle.x;
       y = cell.radius * Math.sin(spin) + circle.y;
-      if (playerToDraw.id === player.id) {
+      if (!isCurrentPlayer(playerToDraw.id)) {
         x = valueInRange(-playerToDraw.x + screenWidth / 2, gameWidth - playerToDraw.x + screenWidth / 2, x);
         y = valueInRange(-playerToDraw.y + screenHeight / 2, gameHeight - playerToDraw.y + screenHeight / 2, y);
       } else {
@@ -526,7 +530,7 @@ function drawPlayer(playerToDraw) {
     graph.fill();
     graph.stroke();
     let nameCell = '';
-    if (playerToDraw.id === player.id) {
+    if (isCurrentPlayer(playerToDraw.id)) {
       nameCell = player.name;
     } else {
       nameCell = playerToDraw.name;
