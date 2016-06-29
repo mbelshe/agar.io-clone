@@ -5,6 +5,7 @@ import '../img/split.png';
 import virusImage from '../img/virus.png';
 import '../audio/spawn.mp3';
 import '../audio/split.mp3';
+import GameEvents from '../../server/GameEvents.js';
 
 import io from 'socket.io-client';
 
@@ -38,6 +39,7 @@ let gameHeight = 0;
 let xoffset = -gameWidth;
 let yoffset = -gameHeight;
 
+let gameStartPending = false;
 let gameStart = false;
 let disconnected = false;
 let died = false;
@@ -48,6 +50,39 @@ let continuity = false;
 let startPingTime = 0;
 let toggleMassState = 0;
 let lineColor = '#000000';
+
+/*
+var GameEvents = {
+		serverTellPlayerMove : 0,
+		leaderboard : 1,
+		kick : 2,
+		playerChat : 3,
+		gotit : 4,
+		windowResized : 5,
+		split : 6, // '2' in the old game
+		heartbeat : 7, // '0' in the old game
+		respawn : 8,
+		fireFood : 9, // '1' in the old game
+		gamePing : 10,
+		pass : 11,
+		kick : 12, 
+		playerJoin : 13,
+		gameSetup : 14,
+		gamePong : 15,
+		welcome : 16,
+		playerDisconnect : 17,
+		serverSendPlayerChat : 18,
+		serverMSG : 19,
+		playerDied : 20,
+		RIP : 21,
+		virusSplit : 22,
+		playerScore : 23,
+		connect_failed : 24,
+		disconnect : 25,
+		connection : 26
+		
+	};
+	*/
 
 const foodConfig = {
   border: 0,
@@ -168,7 +203,7 @@ ChatClient.prototype.sendChat = function(key) {
 
       // Allows for regular messages to be sent to the server.
       } else {
-        socket.emit('playerChat', { sender: player.name, message: text });
+        socket.emit(GameEvents.playerChat, { sender: player.name, message: text });
         this.addChatLine(player.name, text, true);
       }
 
@@ -202,25 +237,26 @@ const chat = new ChatClient();
 // socket stuff.
 function setupSocket() {
   // Handle ping.
-  socket.on('gamePong', () => {
+  socket.on(GameEvents.gamePong, () => {
     const latency = Date.now() - startPingTime;
     debug(`Latency: ${latency}ms`);
     chat.addSystemLine(`Ping: ${latency}ms`);
   });
 
   // Handle error.
-  socket.on('connect_failed', () => {
+  socket.on(GameEvents.connect_failed, () => {
     socket.close();
     disconnected = true;
   });
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     socket.close();
     disconnected = true;
+    gameStartPending = false;
   });
 
   // Handle connection.
-  socket.on('welcome', (playerSettings) => {
+  socket.on(GameEvents.welcome, (playerSettings) => {
     player = playerSettings;
     player.id = playerSettings.id;
     player.name = playerName;
@@ -228,7 +264,7 @@ function setupSocket() {
     player.h = screenHeight;
     player.target = target;
     player.score = 0;
-    socket.emit('gotit', player);
+    socket.emit(GameEvents.gotit, player);
     gameStart = true;
     document.body.id = 'gameStarted';
     debug(`Game started at: ${gameStart}`);
@@ -243,30 +279,31 @@ function setupSocket() {
   function resize() {
     player.w = c.width = screenWidth = playerType === 'player' ? window.innerWidth : gameWidth;
     player.h = c.height = screenHeight = playerType === 'player' ? window.innerHeight : gameHeight;
-    socket.emit('windowResized', { w: screenWidth, h: screenHeight });
+    socket.emit(GameEvents.windowResized, { w: screenWidth, h: screenHeight });
   }
 
   window.addEventListener('resize', resize);
 
-  socket.on('gameSetup', (data) => {
+  socket.on(GameEvents.gameSetup, (data) => {
     gameWidth = data.gameWidth;
     gameHeight = data.gameHeight;
     resize();
   });
 
-  socket.on('playerDied', (data) => {
+  socket.on(GameEvents.playerDied, (data) => {
     chat.addSystemLine(`{GAME} - <b>${(data.name.length < 1 ? 'An unnamed cell' : data.name)}</b> was eaten.`);
   });
 
-  socket.on('playerDisconnect', (data) => {
+  socket.on(GameEvents.playerDisconnect, (data) => {
     chat.addSystemLine(`{GAME} - <b>${(data.name.length < 1 ? 'An unnamed cell' : data.name)}</b> disconnected.`);
   });
 
-  socket.on('playerJoin', (data) => {
+  socket.on(GameEvents.playerJoin, (data) => {
     chat.addSystemLine(`{GAME} - <b>${(data.name.length < 1 ? 'An unnamed cell' : data.name)}</b> joined.`);
   });
 
-  socket.on('leaderboard', (data) => {
+ // socket.on('leaderboard', (data) => {
+  socket.on(GameEvents.leaderboard , (data) => {
     leaderboard = data.leaderboard;
     let status = '<span class="title">Leaderboard</span>';
     for (let i = 0; i < leaderboard.length; i++) {
@@ -277,21 +314,21 @@ function setupSocket() {
         status += leaderboard[i].name.length !== 0 ? `${(i + 1)}. ${leaderboard[i].name}` : `${(i + 1)}. An unnamed cell`;
       }
     }
-    // status += '<br />Players: ' + data.players;
+    status += '<br />Players: ' + data.players;
     document.getElementById('status').innerHTML = status;
   });
 
-  socket.on('serverMSG', (data) => {
+  socket.on(GameEvents.serverMSG, (data) => {
     chat.addSystemLine(data);
   });
 
   // Chat.
-  socket.on('serverSendPlayerChat', (data) => {
+  socket.on(GameEvents.serverSendPlayerChat, (data) => {
     chat.addChatLine(data.sender, data.message, false);
   });
 
   // Handle movement.
-  socket.on('serverTellPlayerMove', (viewableObjects) => {
+  socket.on(GameEvents.serverTellPlayerMove, (viewableObjects) => {
     let playerData = {};
     for (let i = 0; i < viewableObjects.length; i++) {
       if (viewableObjects[i].id === player.id) {
@@ -315,7 +352,7 @@ function setupSocket() {
   });
 
   // Death.
-  socket.on('RIP', () => {
+  socket.on(GameEvents.RIP, () => {
     gameStart = false;
     died = true;
     window.setTimeout(() => {
@@ -329,19 +366,19 @@ function setupSocket() {
     }, 2500);
   });
 
-  socket.on('kick', (data) => {
+  socket.on(GameEvents.kick, (data) => {
     gameStart = false;
     reason = data;
     kicked = true;
     socket.close();
   });
 
-  socket.on('virusSplit', (virusCell) => {
-    socket.emit('2', virusCell);
+  socket.on(GameEvents.virusSplit, (virusCell) => {
+    socket.emit(GameEvents.virusSplit, virusCell);
     reenviar = false;
   });
 
-  socket.on('playerScore', (data) => {
+  socket.on(GameEvents.playerScore, (data) => {
     document.getElementById('score').innerHTML = `Score: ${data}`;
   });
 }
@@ -522,8 +559,8 @@ function drawPlayer(playerToDraw) {
 // drawGameObject
 // Draw's a single game object based on type.  In the future we can make this more object oriented.
 function drawGameObject(obj) {
-  console.log('drawGameObject');
-  console.dir(obj);
+  //console.log('drawGameObject');
+  //console.dir(obj);
 
   if (obj.type == 'player') {
     drawPlayer(obj);
@@ -609,17 +646,20 @@ function gameLoop() {
       orderMass.sort((obj1, obj2) => {
         return obj1.mass - obj2.mass;
       });
-
       drawPlayers(orderMass);
 */
-      socket.emit('0', target); // playerSendTarget "Heartbeat".
+      socket.emit(GameEvents.heartbeat, target); // playerSendTarget "Heartbeat".
     } else {
-      graph.fillStyle = '#333333';
-      graph.fillRect(0, 0, screenWidth, screenHeight);
-      graph.textAlign = 'center';
-      graph.fillStyle = '#FFFFFF';
-      graph.font = 'bold 30px sans-serif';
-      graph.fillText('Game Over!', screenWidth / 2, screenHeight / 2);
+    	graph.fillStyle = '#333333';
+		graph.fillRect(0, 0, screenWidth, screenHeight);
+		graph.textAlign = 'center';
+		graph.fillStyle = '#FFFFFF';
+		graph.font = 'bold 30px sans-serif';
+    	if(!gameStartPending) {
+    		graph.fillText('Game Over!', screenWidth / 2, screenHeight / 2);
+    	} else if(gameStartPending) {
+    		graph.fillText('Loading...', screenWidth / 2, screenHeight / 2);
+    	}
     }
   } else {
     graph.fillStyle = '#333333';
@@ -657,10 +697,11 @@ function startGame(type) {
   if (!socket) {
     socket = io({query: 'type=' + type});
     setupSocket(socket);
+    gameStartPending = true;
   }
   if (!animLoopHandle) {
     animloop();
-    socket.emit('respawn');
+    socket.emit(GameEvents.respawn);
   }
 }
 
@@ -726,11 +767,11 @@ function outOfBounds() {
 function keyInput(event) {
   const key = event.which || event.keyCode;
   if (key === KEY_FIREFOOD && reenviar) {
-    socket.emit('1');
+    socket.emit(GameEvents.fireFood);
     reenviar = false;
   }else if (key === KEY_SPLIT && reenviar) {
     document.getElementById('split_cell').play();
-    socket.emit('2');
+    socket.emit(GameEvents.virusSplit);
     reenviar = false;
   }else if (key === KEY_CHAT) {
     document.getElementById('chatInput').focus();
@@ -738,12 +779,12 @@ function keyInput(event) {
 }
 
 document.getElementById('feed').onclick = () => {
-  socket.emit('1');
+  socket.emit(GameEvents.fireFood);
   reenviar = false;
 };
 
 document.getElementById('split').onclick = () => {
-  socket.emit('2');
+  socket.emit(GameEvents.virusSplit);
   reenviar = false;
 };
 
@@ -768,13 +809,13 @@ function newDirection(direction, list, isAddition) {
       found = true;
       if (!isAddition) {
         result = true;
-				// Removes the direction.
+        // Removes the direction.
         list.splice(i, 1);
       }
       break;
     }
   }
-	// Adds the direction.
+  // Adds the direction.
   if (isAddition && found === false) {
     result = true;
     list.push(direction);
@@ -791,15 +832,16 @@ function updateTarget(list) {
   for (let i = 0, len = list.length; i < len; i++) {
     if (directionHorizontal === 0) {
       if (list[i] === KEY_LEFT) directionHorizontal -= Number.MAX_VALUE;
-			else if (list[i] === KEY_RIGHT) directionHorizontal += Number.MAX_VALUE;
+      else if (list[i] === KEY_RIGHT) directionHorizontal += Number.MAX_VALUE;
     }
     if (directionVertical === 0) {
       if (list[i] === KEY_UP) directionVertical -= Number.MAX_VALUE;
-			else if (list[i] === KEY_DOWN) directionVertical += Number.MAX_VALUE;
+      else if (list[i] === KEY_DOWN) directionVertical += Number.MAX_VALUE;
     }
   }
   target.x += directionHorizontal;
   target.y += directionVertical;
+  console.log("updateTarget: x: " + target.x + " , y: " + target.y);
 }
 
 // Function called when a key is pressed, will change direction if arrow key.
@@ -810,7 +852,8 @@ function directionDown(event) {
     directionLock = true;
     if (newDirection(key, directions, true)) {
       updateTarget(directions);
-      socket.emit('0', target);
+      console.log("Heartbeat sent.");
+      socket.emit(GameEvents.heartbeat, target);
     }
   }
 }
@@ -822,7 +865,7 @@ function directionUp(event) {
     if (newDirection(key, directions, false)) {
       updateTarget(directions);
       if (directions.length === 0) directionLock = false;
-      socket.emit('0', target);
+      socket.emit(GameEvents.heartbeat, target);
     }
   }
 }
@@ -830,7 +873,7 @@ function directionUp(event) {
 function checkLatency() {
   // Ping.
   startPingTime = Date.now();
-  socket.emit('gamePing');
+  socket.emit(GameEvents.gamePing);
 }
 
 function toggleDarkMode() {
@@ -921,11 +964,11 @@ chat.registerCommand('help', 'Information about the chat commands.', () => {
 });
 
 chat.registerCommand('login', 'Login as an admin.', (args) => {
-  socket.emit('pass', args);
+  socket.emit(GameEvents.pass, args);
 });
 
 chat.registerCommand('kick', 'Kick a player, for admins only.', (args) => {
-  socket.emit('kick', args);
+  socket.emit(GameEvents.kick, args);
 });
 
 function gameInput(mouse) {
