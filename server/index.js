@@ -6,6 +6,8 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from '../webpack.config.js';
 import Player from './player';
 import GameBoard from './gameBoard';
+import GameEvents from './GameEvents.js';
+import GameObjectType from './GameObjectType.js';
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
 const app = express();
@@ -181,23 +183,23 @@ function balanceMass() {
 }
 */
 
-io.on('connection', (socket) => {
+io.on("connection", (socket) => {
   console.log('A user connected!', socket.handshake.query.type);
 
   const type = socket.handshake.query.type;
   let radius = Util.massToRadius(Config.defaultPlayerMass);
   let position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(gameBoard.objects, radius) : Util.randomPosition(radius);
-console.log("ADDING PLAYER -- " + socket.id);
+  console.log("ADDING PLAYER -- " + socket.id);
   let currentPlayer = new Player(socket.id, '', position, type);
 
-  socket.on('gotit', (player) => {
+  socket.on(GameEvents.gotit, (player) => {
     console.log(`[INFO] Player ${player.name} connecting!`);
 
     if (gameBoard.findObjectById(player.id)) {
       console.log('[INFO] Player ID is already connected, kicking.');
       socket.disconnect();
     } else if (!Util.validNick(player.name)) {
-      socket.emit('kick', 'Invalid username.');
+      socket.emit(GameEvents.kick, 'Invalid username.');
       socket.disconnect();
     } else {
       console.log(`[INFO] Player ${player.name} connected!`);
@@ -208,62 +210,62 @@ console.log("ADDING PLAYER -- " + socket.id);
       currentPlayer = new Player(player.id, player.name, position, type);
       gameBoard.insert(currentPlayer);
 
-      io.emit('playerJoin', { name: currentPlayer.name });
+      io.emit(GameEvents.playerJoin, { name: currentPlayer.name });
 
-      socket.emit('gameSetup', {
+      socket.emit(GameEvents.gameSetup, {
         gameWidth: Config.gameWidth,
         gameHeight: Config.gameHeight
       });
     }
   });
 
-  socket.on('gamePing', () => {
-    socket.emit('gamePong');
+  socket.on(GameEvents.gamePing, () => {
+    socket.emit(GameEvents.gamePong);
   });
 
-  socket.on('windowResized', (data) => {
+  socket.on(GameEvents.windowResized, (data) => {
     currentPlayer.resize(data);
   });
 
-  socket.on('respawn', () => {
+  socket.on(GameEvents.respawn, () => {
     if (gameBoard.findObjectById(currentPlayer.id)) {
       gameBoard.remove(currentPlayer.id);
     }
-    socket.emit('welcome', currentPlayer);
+    socket.emit(GameEvents.welcome, currentPlayer);
     console.log(`[INFO] User ${currentPlayer.name} respawned!`);
   });
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     if (gameBoard.findObjectById(currentPlayer.id)) {
       gameBoard.remove(currentPlayer.id);
     }
     console.log(`[INFO] User ${currentPlayer.name} disconnected!`);
-    socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
+    socket.broadcast.emit(GameEvents.playerDisconnect, { name: currentPlayer.name });
   });
 
-  socket.on('playerChat', (data) => {
+  socket.on(GameEvents.playerChat, (data) => {
     const _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
     const _message = data.message.replace(/(<([^>]+)>)/ig, '');
     if (Config.logChat === 1) {
       console.log(`[CHAT] [${(new Date()).getHours()}:${(new Date()).getMinutes()}] ${_sender}: ${_message}`);
     }
-    socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message.substring(0, 35)});
+    socket.broadcast.emit(GameEvents.serverSendPlayerChat, {sender: _sender, message: _message.substring(0, 35)});
   });
 
-  socket.on('pass', (data) => {
+  socket.on(GameEvents.pass, (data) => {
     if (data[0] === Config.adminPass) {
       console.log(`[ADMIN] ${currentPlayer.name} just logged in as an admin!`);
-      socket.emit('serverMSG', `Welcome back ${currentPlayer.name}`);
-      socket.broadcast.emit('serverMSG', `${currentPlayer.name} just logged in as admin!`);
+      socket.emit(GameEvents.serverMSG, `Welcome back ${currentPlayer.name}`);
+      socket.broadcast.emit(GameEvents.serverMSG, `${currentPlayer.name} just logged in as admin!`);
       currentPlayer.admin = true;
     } else {
       console.log(`[ADMIN] ${currentPlayer.name} attempted to log in with incorrect password.`);
-      socket.emit('serverMSG', 'Password incorrect, attempt logged.');
+      socket.emit(GameEvents.serverMSG, 'Password incorrect, attempt logged.');
       // TODO: Actually log incorrect passwords.
     }
   });
 
-  socket.on('kick', (data) => {
+  socket.on(GameEvents.kick, (data) => {
 /*
     if (currentPlayer.admin) {
       const [name, ...reasons] = data;
@@ -295,15 +297,17 @@ console.log("ADDING PLAYER -- " + socket.id);
   });
 
   // Heartbeat function, update everytime.
-  socket.on('0', (target) => {
+  socket.on(GameEvents.heartbeat, (target) => {
+	console.log("Heartbeat sent. Target: ");
     currentPlayer.heartbeat(target);
+    
   });
 
-  socket.on('1', () => {
+  socket.on(GameEvents.fireFood, () => {
     currentPlayer.fireFood(massFood);
   });
 
-  socket.on('2', (virusCell) => {
+  socket.on(GameEvents.virusSplit, (virusCell) => {
     if (currentPlayer.canSplit()) {
       // Split single cell from virus
       if (virusCell) {
@@ -355,9 +359,11 @@ function tickPlayer(currentPlayer) {
   let z = 0;
 
   if (currentPlayer.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
-    sockets[currentPlayer.id].emit('kick', `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
+    sockets[currentPlayer.id].emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
     sockets[currentPlayer.id].disconnect();
   }
+  currentPlayer.move();
+  
 
 /*
   moveBot();
@@ -558,7 +564,7 @@ function gameLoop() {
 function sendUpdates() {
   gameBoard.objects.forEach(function(object) {
 console.dir(object);
-console.log("--sendUpdates loop for: " + object.id + "," + object.type);
+//console.log("--sendUpdates loop for: " + object.id + "," + object.type);
     if (object.type === 'player') {
 /*
       // center the view if x/y is undefined, this will happen for spectators
@@ -616,9 +622,10 @@ console.log("--sendUpdates loop for: " + object.id + "," + object.type);
 */
       let visibleObjects = gameBoard.find({x: object.x - object.w/2, y: object.y - object.h/2, w: object.w, h: object.h});
 console.dir(visibleObjects);
-      sockets[object.id].emit('serverTellPlayerMove', visibleObjects);
+      sockets[object.id].emit(GameEvents.serverTellPlayerMove, visibleObjects);
       if (leaderboardChanged) {
-        sockets[object.id].emit('leaderboard', {
+       // sockets[object.id].emit('leaderboard', {
+    	  sockets[object.id].emit(GameEvents.leaderboard, {
           players: users.length,
           leaderboard: leaderboard
         });
