@@ -34,5 +34,6 @@
   "newPlayerInitialPosition": "farthest",
   "massLossRate": 1,
   "minMassLoss": 50,
-  "mergeTimer": 15
+  "mergeTimer": 15,
+  "initialSpeed": 6.25
 }
