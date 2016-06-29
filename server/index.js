@@ -298,7 +298,6 @@ io.on("connection", (socket) => {
 
   // Heartbeat function, update everytime.
   socket.on(GameEvents.heartbeat, (target) => {
-	console.log("Heartbeat sent. Target: ");
     currentPlayer.heartbeat(target);
     
   });
@@ -365,9 +364,9 @@ function tickPlayer(currentPlayer) {
   currentPlayer.move();
   
 
+  currentPlayer.move();
 /*
   moveBot();
-  currentPlayer.move();
 
   function deleteFood(f) {
     food[f] = {};
@@ -563,7 +562,6 @@ function gameLoop() {
 
 function sendUpdates() {
   gameBoard.objects.forEach(function(object) {
-console.dir(object);
 //console.log("--sendUpdates loop for: " + object.id + "," + object.type);
     if (object.type === 'player') {
 /*
