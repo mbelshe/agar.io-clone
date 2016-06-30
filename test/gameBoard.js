@@ -20,7 +20,7 @@ describe('gameBoard.js', function () {
     });
 
     it('should insert object', function () {
-      let obj = new GameObject(gb, 1);
+      let obj = new GameObject(1);
       obj.x = obj.y = 10;
       expect(gb.insert(obj)).to.be.true;
       let objects = gb.objects;
@@ -28,15 +28,16 @@ describe('gameBoard.js', function () {
     });
 
     it('should insert another object', function () {
-      let obj = new GameObject(gb, 2);
+      let obj = new GameObject(2);
       obj.x = obj.y = 20;
+console.dir(obj);
       expect(gb.insert(obj)).to.be.true;
       let objects = gb.objects;
       expect(objects.length).to.be.eq(2);
     });
 
     it('should not insert duplicate object', function () {
-      let obj = new GameObject(gb, 1);
+      let obj = new GameObject(1);
       expect(gb.insert(obj)).to.be.false;
     });
 
