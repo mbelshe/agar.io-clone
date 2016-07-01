@@ -7,6 +7,15 @@ import GameObject from './gameObject';
 const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
 
 let playerCount = 0;
+static totalPlayerMass = 0;
+
+static function getTotalPlayerMass() {
+	return totalPlayerMass;
+}
+
+static function getPlayerCount() {
+    return playerCount;
+  }
 
 class Player extends GameObject {
   constructor(id, name, position, type, speed) {
@@ -39,11 +48,48 @@ class Player extends GameObject {
       y: 0
     };
   }
+  
+  constructor() {
+	  	super(id);
+	    this.name = 'Aniketh';
+	    this.type = 'player';
 
-  static get playerCount() {
-    return playerCount;
+	    if (!speed) {
+	      speed = Config.initialSpeed;
+	    }
+	    position = Config.newPlayerInitialPosition;
+	    this.radius = Util.massToRadius(Config.defaultPlayerMass);
+	    this.cells = [{
+	      mass: Config.defaultPlayerMass,
+	      x: position.x,
+	      y: position.y,
+	      radius: this.radius,
+	      speed: speed
+	    }];
+	    this.massTotal = Config.defaultPlayerMass;
+	    this.admin = false;
+	    this.x = position.x;
+	    this.y = position.y;
+	    this.w = Config.gameWidth;
+	    this.h = Config.gameHeight;
+	    this.hue = Math.round(Math.random() * 360);
+	    this.lastHeartBeat = +new Date();
+	    this.target = {
+	      x: 0,
+	      y: 0
+	    };
   }
 
+  
+   setMass(x) {
+	  this.totalPlayerMass += (x-massTotal);
+	  this.massTotal = x;
+  }
+
+   	die() {
+   		this.totalPlayerMass -= massTotal;
+   		this.massTotal = 0;
+   	}
   heartbeat(target) {
     this.lastHeartbeat = new Date().getTime();
     const {x, y} = target;
