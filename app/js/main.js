@@ -5,7 +5,7 @@ import '../img/split.png';
 import virusImage from '../img/virus.png';
 import '../audio/spawn.mp3';
 import '../audio/split.mp3';
-import GameEvents from '../../server/GameEvents.js';
+import GameEvents from '../../server/gameEvents.js';
 
 import io from 'socket.io-client';
 
@@ -50,39 +50,6 @@ let continuity = false;
 let startPingTime = 0;
 let toggleMassState = 0;
 let lineColor = '#000000';
-
-/*
-var GameEvents = {
-		serverTellPlayerMove : 0,
-		leaderboard : 1,
-		kick : 2,
-		playerChat : 3,
-		gotit : 4,
-		windowResized : 5,
-		split : 6, // '2' in the old game
-		heartbeat : 7, // '0' in the old game
-		respawn : 8,
-		fireFood : 9, // '1' in the old game
-		gamePing : 10,
-		pass : 11,
-		kick : 12, 
-		playerJoin : 13,
-		gameSetup : 14,
-		gamePong : 15,
-		welcome : 16,
-		playerDisconnect : 17,
-		serverSendPlayerChat : 18,
-		serverMSG : 19,
-		playerDied : 20,
-		RIP : 21,
-		virusSplit : 22,
-		playerScore : 23,
-		connect_failed : 24,
-		disconnect : 25,
-		connection : 26
-		
-	};
-	*/
 
 const foodConfig = {
   border: 0,

@@ -6,8 +6,8 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from '../webpack.config.js';
 import Player from './player';
 import GameBoard from './gameBoard';
-import GameEvents from './GameEvents.js';
-import GameObjectType from './GameObjectType.js';
+import GameEvents from './gameEvents.js';
+import GameObjectType from './gameObjectType.js';
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
 const app = express();
