@@ -18,22 +18,18 @@ class Player extends GameObject {
     return totalCount;
   };
 
-  constructor(id, name, position, type, speed) {
+  constructor(id, socket, name, position) {
     super(id);
+    this.socket = socket;
     this.name = name;
-    this.type = type;
-
-    if (!speed) {
-      speed = Config.initialSpeed;
-    }
-
+    this.type = 'player';
     this.radius = Util.massToRadius(Config.defaultPlayerMass);
     this.cells = [{
       mass: Config.defaultPlayerMass,
       x: position.x,
       y: position.y,
       radius: this.radius,
-      speed: speed
+      speed: Config.initialSpeed
     }];
     this.massTotal = Config.defaultPlayerMass;
     this.admin = false;
@@ -47,6 +43,7 @@ class Player extends GameObject {
       x: 0,
       y: 0
     };
+    Config.gameBoard.insert(this);
     totalCount++;
   }
   
@@ -67,6 +64,7 @@ class Player extends GameObject {
     totalMass -= this._massTotal;
     this._massTotal = 0;
     totalCount--;
+    Config.gameBoard.remove(this.id);
   };
 
   heartbeat(target) {
@@ -160,6 +158,24 @@ class Player extends GameObject {
     this.x = x / this.cells.length;
     this.y = y / this.cells.length;
   };
+
+  // Return the client's representation of the Player object
+  toJSON() {
+    return {
+      name: this.name,
+      type: this.type,
+      radius: this.radius,
+      cells: this.cells,
+      massTotal: this.massTotal,
+      x: this.x,
+      y: this.y,
+      w: this.w,
+      h: this.h,
+      hue: this.hue,
+      target: this.target
+    };
+  }
+
 };
 
 export default Player;

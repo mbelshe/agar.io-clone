@@ -10,6 +10,7 @@ var expect = require('chai').expect;
  */
 
 describe('food.js', function() {
+  Config.gameBoard = new GameBoard();
   
   describe('Food', function() {
     let foodList = [];

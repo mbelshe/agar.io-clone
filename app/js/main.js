@@ -215,7 +215,7 @@ function setupSocket() {
   });
 
   // Handle error.
-  socket.on(GameEvents.connect_failed, () => {
+  socket.on("connect_failed", () => {
     socket.close();
     disconnected = true;
   });
@@ -535,7 +535,9 @@ function drawGameObject(obj) {
 
   if (obj.type == 'player') {
     drawPlayer(obj);
-  } 
+  } else if (obj.type == 'food') {
+    drawFood(obj);
+  }
 }
 
 function drawborder() {

@@ -41,7 +41,8 @@ import Util from './lib/util';
 const http = (Http).Server(app);
 const io = (IO)(http);
 
-const gameBoard = new GameBoard();
+// We store the gameboard in the configuration.
+Config.gameBoard = new GameBoard();
 
 /*
 const users = [];
@@ -50,7 +51,6 @@ const food = [];
 const virus = [];
 const bots = [];
 */
-const sockets = {};
 
 let leaderboard = [];
 let leaderboardChanged = false;
@@ -163,16 +163,12 @@ function balanceMass() {
 io.on("connection", (socket) => {
   console.log('A user connected!', socket.handshake.query.type);
 
-  const type = socket.handshake.query.type;
-  let radius = Util.massToRadius(Config.defaultPlayerMass);
-  let position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(gameBoard.objects, radius) : Util.randomPosition(radius);
-  console.log("ADDING PLAYER -- " + socket.id);
-  let currentPlayer = new Player(socket.id, '', position, type);
+  let currentPlayer;
 
   socket.on(GameEvents.gotit, (player) => {
     console.log(`[INFO] Player ${player.name} connecting!`);
 
-    if (gameBoard.findObjectById(player.id)) {
+    if (Config.gameBoard.findObjectById(player.id)) {
       console.log('[INFO] Player ID is already connected, kicking.');
       socket.disconnect();
     } else if (!Util.validNick(player.name)) {
@@ -180,12 +176,7 @@ io.on("connection", (socket) => {
       socket.disconnect();
     } else {
       console.log(`[INFO] Player ${player.name} connected!`);
-      sockets[player.id] = socket;
-
-      radius = Util.massToRadius(Config.defaultPlayerMass);
-      position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(gameBoard.objects, radius) : Util.randomPosition(radius);
-      currentPlayer = new Player(player.id, player.name, position, type);
-      gameBoard.insert(currentPlayer);
+      currentPlayer.name = player.name;
 
       io.emit(GameEvents.playerJoin, { name: currentPlayer.name });
 
@@ -201,26 +192,44 @@ io.on("connection", (socket) => {
   });
 
   socket.on(GameEvents.windowResized, (data) => {
+    if (!currentPlayer) {
+      return;
+    }
+
     currentPlayer.resize(data);
   });
 
   socket.on(GameEvents.respawn, () => {
-    if (gameBoard.findObjectById(currentPlayer.id)) {
-      gameBoard.remove(currentPlayer.id);
+    let name = '<respawned>';
+    if (currentPlayer && Config.gameBoard.findObjectById(currentPlayer.id)) {
+      name = currentPlayer.name;
+      Config.gameBoard.remove(currentPlayer.id);
     }
+
+    let radius = Util.massToRadius(Config.defaultPlayerMass);
+    let position = Util.uniformPosition(Config.gameBoard.objects, radius);
+    currentPlayer = new Player(socket.id, socket, name, position);
     socket.emit(GameEvents.welcome, currentPlayer);
     console.log(`[INFO] User ${currentPlayer.name} respawned!`);
   });
 
   socket.on("disconnect", () => {
-    if (gameBoard.findObjectById(currentPlayer.id)) {
-      gameBoard.remove(currentPlayer.id);
+    if (!currentPlayer) {
+      return;
+    }
+
+    if (Config.gameBoard.findObjectById(currentPlayer.id)) {
+      Config.gameBoard.remove(currentPlayer.id);
     }
     console.log(`[INFO] User ${currentPlayer.name} disconnected!`);
     socket.broadcast.emit(GameEvents.playerDisconnect, { name: currentPlayer.name });
   });
 
   socket.on(GameEvents.playerChat, (data) => {
+    if (!currentPlayer) {
+      return;
+    }
+
     const _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
     const _message = data.message.replace(/(<([^>]+)>)/ig, '');
     if (Config.logChat === 1) {
@@ -230,6 +239,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on(GameEvents.pass, (data) => {
+    if (!currentPlayer) {
+      return;
+    }
+
     if (data[0] === Config.adminPass) {
       console.log(`[ADMIN] ${currentPlayer.name} just logged in as an admin!`);
       socket.emit(GameEvents.serverMSG, `Welcome back ${currentPlayer.name}`);
@@ -243,6 +256,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on(GameEvents.kick, (data) => {
+    if (!currentPlayer) {
+      return;
+    }
+
 /*
     if (currentPlayer.admin) {
       const [name, ...reasons] = data;
@@ -257,8 +274,8 @@ io.on("connection", (socket) => {
             console.log(`[ADMIN] User ${users[e].name} kicked successfully by ${currentPlayer.name}`);
           }
           socket.emit('serverMSG', `User ${users[e].name} was kicked by ${currentPlayer.name}`);
-          sockets[users[e].id].emit('kick', reason);
-          sockets[users[e].id].disconnect();
+          users[e].socket.emit('kick', reason);
+          users[e].socket.disconnect();
           users.splice(e, 1);
           worked = true;
         }
@@ -280,10 +297,18 @@ io.on("connection", (socket) => {
   });
 
   socket.on(GameEvents.fireFood, () => {
+    if (!currentPlayer) {
+      return;
+    }
+
     currentPlayer.fireFood(massFood);
   });
 
   socket.on(GameEvents.virusSplit, (virusCell) => {
+    if (!currentPlayer) {
+      return;
+    }
+
     if (currentPlayer.canSplit()) {
       // Split single cell from virus
       if (virusCell) {
@@ -335,8 +360,8 @@ function tickPlayer(currentPlayer) {
   let z = 0;
 
   if (currentPlayer.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
-    sockets[currentPlayer.id].emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
-    sockets[currentPlayer.id].disconnect();
+    currentPlayer.socket.emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
+    currentPlayer.socket.disconnect();
   }
   currentPlayer.move();
   
@@ -368,7 +393,7 @@ function tickPlayer(currentPlayer) {
           } else {
             users.splice(numUser, 1);
             io.emit('playerDied', { name: collision.bUser.name });
-            sockets[collision.bUser.id].emit('RIP');
+            collision.bUser.socket.emit('RIP');
           }
         }
 
@@ -443,7 +468,7 @@ function tickPlayer(currentPlayer) {
       .reduce((a, b, c) => { return b ? a.concat(c) : a; }, []);
 
     if (virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) {
-      sockets[currentPlayer.id].emit('virusSplit', z);
+      currentPlayer.socket.emit('virusSplit', z);
     }
 
     let masaGanada = 0;
@@ -468,7 +493,7 @@ function tickPlayer(currentPlayer) {
       currentCell.mass += masaGanada;
       currentPlayer.massTotal += masaGanada;
     }
-    sockets[currentPlayer.id].emit('playerScore', currentPlayer.score);
+    currentPlayer.socket.emit('playerScore', currentPlayer.score);
     currentCell.radius = Util.massToRadius(currentCell.mass);
     playerCircle.r = currentCell.radius;
 
@@ -482,7 +507,7 @@ function tickPlayer(currentPlayer) {
 }
 
 function moveLoop() {
-  gameBoard.objects.forEach((u) => {
+  Config.gameBoard.objects.forEach((u) => {
     if (u.type == 'player') {
       tickPlayer(u);
     }
@@ -538,9 +563,9 @@ function gameLoop() {
 }
 
 function sendUpdates() {
-  gameBoard.objects.forEach(function(object) {
-//console.log("--sendUpdates loop for: " + object.id + "," + object.type);
+  Config.gameBoard.objects.forEach(function(object) {
     if (object.type === 'player') {
+console.log("--sendUpdates loop for: " + object.id + "," + object.type);
 /*
       // center the view if x/y is undefined, this will happen for spectators
       u.x = u.x || Config.gameWidth / 2;
@@ -595,15 +620,11 @@ function sendUpdates() {
           };
         });
 */
-      let visibleObjects = gameBoard.find({x: object.x - object.w/2, y: object.y - object.h/2, w: object.w, h: object.h});
+      let visibleObjects = Config.gameBoard.find({x: object.x - object.w/2, y: object.y - object.h/2, w: object.w, h: object.h});
 console.dir(visibleObjects);
-      sockets[object.id].emit(GameEvents.serverTellPlayerMove, visibleObjects);
+      object.socket.emit(GameEvents.serverTellPlayerMove, visibleObjects);
       if (leaderboardChanged) {
-       // sockets[object.id].emit('leaderboard', {
-    	  sockets[object.id].emit(GameEvents.leaderboard, {
-          players: users.length,
-          leaderboard: leaderboard
-        });
+        object.socket.emit(GameEvents.leaderboard, { players: users.length, leaderboard: leaderboard });
       }
     }
   });

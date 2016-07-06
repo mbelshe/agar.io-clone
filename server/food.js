@@ -1,7 +1,8 @@
 "use strict";
 
-import GameObject from './gameObject.js';
 import Config from '../config.json';
+import GameObject from './gameObject.js';
+import Util from './lib/util';
 
 var foodCount = 0;
 
@@ -15,21 +16,11 @@ class Food extends GameObject {
   };
 
   static addFood(foodToAdd) {
-/*
-    const radius = Util.massToRadius(Config.foodMass);
     while (foodToAdd--) {
-      const position = Config.foodUniformDisposition ? Util.uniformPosition(food, radius) : Util.randomPosition(radius);
-      food.push({
-        // Make IDs unique.
-        id: ((new Date()).getTime() + '' + food.length) >>> 0,
-        x: position.x,
-        y: position.y,
-        radius: radius,
-        mass: Math.random() + 2,
-        hue: Math.round(Math.random() * 360)
-      });
+      const radius = Util.massToRadius(Config.foodMass);
+      const position = Util.uniformPosition(Config.gameBoard.objects, radius);
+      new Food(position.x, position.y);
     }
-*/
   }
 
   static removeFood(foodToRemove) {
@@ -40,12 +31,21 @@ class Food extends GameObject {
 */
   }
 
-  constructor(position) {
+  constructor(x, y) {
     super('F' + foodCount++);  // Give all food objects the identifier "F<XXXX>"
+    this.type = 'food';
+
+    this.x = x;
+    this.y = y;
+    this.radius = Util.massToRadius(Config.foodMass);
+    this.mass = Config.foodMass;
+    this.hue = Math.round(Math.random() * 360);
+    Config.gameBoard.insert(this);
   }
 
   eat() {
     foodCount--;
+    Config.gameBoard.insert(this.id);
   }
 };
 

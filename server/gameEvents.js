@@ -27,7 +27,6 @@ var GameEvents = {
   RIP : 21, //'RIP', 
   virusSplit : 22, //'virusSplit', 
   playerScore :  23, //'playerScore', 
-  connect_failed : 24 //'connect_failed'   
 };
 
 export default GameEvents;

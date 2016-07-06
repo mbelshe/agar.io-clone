@@ -10,6 +10,7 @@ var expect = require('chai').expect;
  */
 
 describe('player.js', function() {
+  Config.gameBoard = new GameBoard();
   
   describe('Player', function() {
     let player;
