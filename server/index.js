@@ -4,6 +4,7 @@ import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from '../webpack.config.js';
+import Food from './food';
 import Player from './player';
 import GameBoard from './gameBoard';
 import GameEvents from './gameEvents.js';
@@ -58,23 +59,6 @@ const V = SAT.Vector;
 const C = SAT.Circle;
 
 /*
-function addFood(add) {
-  const radius = Util.massToRadius(Config.foodMass);
-  let toAdd = add;
-  while (toAdd--) {
-    const position = Config.foodUniformDisposition ? Util.uniformPosition(food, radius) : Util.randomPosition(radius);
-    food.push({
-      // Make IDs unique.
-      id: ((new Date()).getTime() + '' + food.length) >>> 0,
-      x: position.x,
-      y: position.y,
-      radius: radius,
-      mass: Math.random() + 2,
-      hue: Math.round(Math.random() * 360)
-    });
-  }
-}
-
 function addVirus(add) {
   let toAdd = add;
   while (toAdd--) {
@@ -105,13 +89,6 @@ function addBot(add) {
     bot.target.directionX = 'left' || 'right';
     bot.target.directionY = 'up' || 'down';
     bots.push(bot);
-  }
-}
-
-function removeFood(rem) {
-  let toRem = rem;
-  while (toRem--) {
-    food.pop();
   }
 }
 
@@ -146,28 +123,28 @@ function moveMass(mass) {
     mass.y = borderCalc;
   }
 }
+*/
 
 function balanceMass() {
-  const totalMass = food.length * Config.foodMass + users
-  .map((u) => { return u.massTotal; })
-  .reduce((pu, cu) => { return pu + cu; }, 0);
+  const totalMass = Food.mass + Player.mass;
 
   const massDiff = Config.gameMass - totalMass;
-  const maxFoodDiff = Config.maxFood - food.length;
+  const maxFoodDiff = Config.maxFood - Food.count;
   const foodDiff = parseInt(massDiff / Config.foodMass, 10) - maxFoodDiff;
   const foodToAdd = Math.min(foodDiff, maxFoodDiff);
   const foodToRemove = -Math.max(foodDiff, maxFoodDiff);
 
   if (foodToAdd > 0) {
-    // console.log('[DEBUG] Adding ' + foodToAdd + ' food to level!');
-    addFood(foodToAdd);
-    // console.log('[DEBUG] Mass rebalanced!');
+    console.log('[DEBUG] Adding ' + foodToAdd + ' food to level!');
+    Food.addFood(foodToAdd);
+    console.log('[DEBUG] Mass rebalanced!');
   } else if (foodToRemove > 0) {
-    // console.log('[DEBUG] Removing ' + foodToRemove + ' food from level!');
-    removeFood(foodToRemove);
-    // console.log('[DEBUG] Mass rebalanced!');
+    console.log('[DEBUG] Removing ' + foodToRemove + ' food from level!');
+    Food.removeFood(foodToRemove);
+    console.log('[DEBUG] Mass rebalanced!');
   }
 
+/*
   const virusToAdd = Config.virus.maxVirus - virus.length;
 
   if (virusToAdd > 0) {
@@ -180,8 +157,8 @@ function balanceMass() {
       addBot(botToAdd);
     }
   }
-}
 */
+}
 
 io.on("connection", (socket) => {
   console.log('A user connected!', socket.handshake.query.type);
@@ -556,8 +533,8 @@ function gameLoop() {
     });
   }
 
-  balanceMass();
 */
+  balanceMass();
 }
 
 function sendUpdates() {

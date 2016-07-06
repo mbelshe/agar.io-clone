@@ -6,16 +6,16 @@ import GameObject from './gameObject';
 
 const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
 
-var totalPlayerMass = 0;
-var totalPlayerCount = 0;
+var totalMass = 0;
+var totalCount = 0;
 
 class Player extends GameObject {
-  static get playerMass() {
-    return totalPlayerMass;
+  static get mass() {
+    return totalMass;
   };
 
-  static get playerCount() {
-    return totalPlayerCount;
+  static get count() {
+    return totalCount;
   };
 
   constructor(id, name, position, type, speed) {
@@ -47,7 +47,7 @@ class Player extends GameObject {
       x: 0,
       y: 0
     };
-    totalPlayerCount++;
+    totalCount++;
   }
   
   // TODO: Rename to mass?
@@ -55,7 +55,7 @@ class Player extends GameObject {
     if (!this._massTotal) {  // may have been undefined
       this._massTotal = 0;
     }
-    totalPlayerMass += (x - this._massTotal);
+    totalMass += (x - this._massTotal);
     this._massTotal = x;
   };
 
@@ -64,9 +64,9 @@ class Player extends GameObject {
   }
 
   die() {
-    totalPlayerMass -= this._massTotal;
+    totalMass -= this._massTotal;
     this._massTotal = 0;
-    totalPlayerCount--;
+    totalCount--;
   };
 
   heartbeat(target) {
