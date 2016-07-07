@@ -352,15 +352,37 @@ function moveBot() {
   });
 }
 
-function tickPlayer(currentPlayer) {
+function tickPlayer(player) {
   // TODO: THIS SHOULD NOT HAVE TO BE DECLARED HERE FIX SCOPE
   let z = 0;
 
-  if (currentPlayer.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
-    currentPlayer.socket.emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
-    currentPlayer.socket.disconnect();
+  if (player.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
+    player.socket.emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
+    player.socket.disconnect();
   }
-  currentPlayer.move();
+  player.move();
+
+  // Create a square around the user's circle.
+  var playerBox = {
+    x: player.x - (player.radius / 2),
+    y: player.y - (player.radius / 2),
+    w: player.radius * 2,
+    h: player.radius * 2
+  };
+  let collissions = Config.gameBoard.find(playerBox);
+  collissions.forEach(function(object) {
+    if (object.type == 'player') {
+      if (object.id == player.id) {
+        return;   // don't collide with self.
+      }
+      console.log("COLLIDING WITH PLAYER " + object.id);
+    } else if (object.type == 'food') {
+      console.log("COLLIDING WITH FOOD! " + object.id);
+      // 1. player.eat(object);
+    }
+  });
+
+
 /*
   moveBot();
 
