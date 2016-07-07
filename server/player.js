@@ -3,11 +3,13 @@
 import Config from '../config.json';
 import Util from './lib/util';
 import GameObject from './gameObject';
+import Leaderboard from './leaderboard';
 
 const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
 
 var totalMass = 0;
 var totalCount = 0;
+var leaders = new Leaderboard();
 
 class Player extends GameObject {
   static get mass() {
@@ -17,6 +19,10 @@ class Player extends GameObject {
   static get count() {
     return totalCount;
   };
+
+  static get leaderboard() {
+    return leaders.leaderboard;
+  }
 
   constructor(id, socket, name, position) {
     super(id);
@@ -54,6 +60,7 @@ class Player extends GameObject {
     }
     totalMass += (x - this._massTotal);
     this._massTotal = x;
+    leaders.update(this);
   };
 
   get massTotal() {
@@ -65,6 +72,7 @@ class Player extends GameObject {
     this._massTotal = 0;
     totalCount--;
     Config.gameBoard.remove(this.id);
+    leaders.remove(this);
   };
 
   heartbeat(target) {

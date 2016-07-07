@@ -21,14 +21,14 @@ describe('player.js', function() {
     });
 
     it('should create a new player', function () {
-      player = new Player(1, 'aniketh', {x: 0, y: 0}, 'player', 0);
+      player = new Player(1, undefined, 'aniketh', {x: 0, y: 0});
       expect(player).to.not.be.undefined;
       expect(Player.mass).to.be.eq(Config.defaultPlayerMass);
       expect(Player.count).to.be.eq(1);
     });
     
     it('should return the totalPlayerMass for two players', function() {
-      let player2 = new Player(2, 'mike', {x: 0, y: 0}, 'player', 0);
+      let player2 = new Player(2, undefined, 'mike', {x: 0, y: 0});
       expect(Player.mass).to.be.eq(2 * Config.defaultPlayerMass);
       player2.die();
       expect(Player.mass).to.be.eq(1 * Config.defaultPlayerMass);
@@ -58,7 +58,49 @@ describe('player.js', function() {
       expect(player.w).to.be.eq(dim.w);
       expect(player.h).to.be.eq(dim.h);
     });
-    
   });
-  
+
+  describe('Player', function() {
+    let player;
+    it('should get leaderboard',function() {
+      player = new Player(3, undefined, 'leader', {x: 0, y: 0});
+      let leaderboard = Player.leaderboard;
+      expect(leaderboard.length).to.be.eq(1);
+      expect(leaderboard[0].id).to.be.eq(player.id);
+    });
+
+    it('should get two players in leaderboard',function() {
+      let player2 = new Player(4, undefined, 'leader', {x: 0, y: 0});
+      let leaderboard = Player.leaderboard;
+      expect(leaderboard.length).to.be.eq(2);
+      expect(leaderboard[0].id).to.be.eq(player.id);
+      expect(leaderboard[1].id).to.be.eq(player2.id);
+      expect(leaderboard[0].score).to.be.eq(leaderboard[1].score);
+    });
+
+    it('should insert new leader', function() {
+      let player3 = new Player(5, undefined, 'leader', {x: 0, y: 0});
+      player3.massTotal = 100;
+      let leaderboard = Player.leaderboard;
+      expect(leaderboard.length).to.be.eq(3);
+      expect(leaderboard[0].id).to.be.eq(player3.id);
+    });
+
+    it('should max out leaderboard', function() {
+      let players = [];
+      for (var index = 0; index < 20; ++index) {
+        let player = new Player(100 + index, undefined, 'leader', {x: 0, y: 0});
+        player.massTotal = 1000 + index;
+        let leaderboard = Player.leaderboard;
+        expect(leaderboard.length).to.be.eq(Math.min(4 +index, 10));
+        expect(leaderboard[0].id).to.be.eq(player.id);
+        players.push(player);
+      }
+      for (var index = 0; index < 20; ++index) {
+        players[index].die();
+      }
+      expect(Player.leaderboard.length).to.be.eq(0);
+    });
+
+  });
 });
