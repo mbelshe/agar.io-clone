@@ -64,14 +64,14 @@ describe('player.js', function() {
     let player;
     it('should get leaderboard',function() {
       player = new Player(3, undefined, 'leader', {x: 0, y: 0});
-      let leaderboard = Player.leaderboard;
+      let leaderboard = Player.leaderboard.leaders;
       expect(leaderboard.length).to.be.eq(1);
       expect(leaderboard[0].id).to.be.eq(player.id);
     });
 
     it('should get two players in leaderboard',function() {
       let player2 = new Player(4, undefined, 'leader', {x: 0, y: 0});
-      let leaderboard = Player.leaderboard;
+      let leaderboard = Player.leaderboard.leaders;
       expect(leaderboard.length).to.be.eq(2);
       expect(leaderboard[0].id).to.be.eq(player.id);
       expect(leaderboard[1].id).to.be.eq(player2.id);
@@ -81,7 +81,7 @@ describe('player.js', function() {
     it('should insert new leader', function() {
       let player3 = new Player(5, undefined, 'leader', {x: 0, y: 0});
       player3.massTotal = 100;
-      let leaderboard = Player.leaderboard;
+      let leaderboard = Player.leaderboard.leaders;
       expect(leaderboard.length).to.be.eq(3);
       expect(leaderboard[0].id).to.be.eq(player3.id);
     });
@@ -91,7 +91,7 @@ describe('player.js', function() {
       for (var index = 0; index < 20; ++index) {
         let player = new Player(100 + index, undefined, 'leader', {x: 0, y: 0});
         player.massTotal = 1000 + index;
-        let leaderboard = Player.leaderboard;
+        let leaderboard = Player.leaderboard.leaders;
         expect(leaderboard.length).to.be.eq(Math.min(4 +index, 10));
         expect(leaderboard[0].id).to.be.eq(player.id);
         players.push(player);
@@ -99,8 +99,28 @@ describe('player.js', function() {
       for (var index = 0; index < 20; ++index) {
         players[index].die();
       }
-      expect(Player.leaderboard.length).to.be.eq(0);
+      expect(Player.leaderboard.leaders.length).to.be.eq(0);
     });
 
+    it('should be dirty', function() {
+      expect(Player.leaderboard.dirty).to.be.true;
+    });
+
+    it('should clear dirty', function() {
+      Player.leaderboard.clearDirty();
+      expect(Player.leaderboard.dirty).to.be.false;
+    });
+
+    it('should be dirty after insert', function() {
+      new Player(55, undefined, 'leader', {x: 0, y: 0});
+      expect(Player.leaderboard.dirty).to.be.true;
+    });
+
+    it('should be dirty after remove', function() {
+      Player.leaderboard.clearDirty();
+      expect(Player.leaderboard.dirty).to.be.false;
+      Player.leaderboard.remove({id: 55});
+      expect(Player.leaderboard.dirty).to.be.true;
+    });
   });
 });

@@ -21,7 +21,7 @@ class Player extends GameObject {
   };
 
   static get leaderboard() {
-    return leaders.leaderboard;
+    return leaders;
   }
 
   constructor(id, socket, name, position) {
