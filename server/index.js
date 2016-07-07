@@ -52,9 +52,6 @@ const virus = [];
 const bots = [];
 */
 
-let leaderboard = [];
-let leaderboardChanged = false;
-
 const V = SAT.Vector;
 const C = SAT.Circle;
 
@@ -200,7 +197,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on(GameEvents.respawn, () => {
-    let name = '<respawned>';
+    let name = '(no name)';
     if (currentPlayer && Config.gameBoard.findObjectById(currentPlayer.id)) {
       name = currentPlayer.name;
       Config.gameBoard.remove(currentPlayer.id);
@@ -364,9 +361,6 @@ function tickPlayer(currentPlayer) {
     currentPlayer.socket.disconnect();
   }
   currentPlayer.move();
-  
-
-  currentPlayer.move();
 /*
   moveBot();
 
@@ -522,31 +516,6 @@ function moveLoop() {
 function gameLoop() {
 /*
   if (users.length > 0) {
-    users.sort((a, b) => { return b.massTotal - a.massTotal; });
-
-    const topUsers = [];
-
-    for (let i = 0; i < Math.min(10, users.length); i++) {
-      if (users[i].type === 'player') {
-        topUsers.push({
-          id: users[i].id,
-          name: users[i].name
-        });
-      }
-    }
-    if (isNaN(leaderboard) || leaderboard.length !== topUsers.length) {
-      leaderboard = topUsers;
-      leaderboardChanged = true;
-    } else {
-      for (let i = 0; i < leaderboard.length; i++) {
-        if (leaderboard[i].id !== topUsers[i].id) {
-          leaderboard = topUsers;
-          leaderboardChanged = true;
-          break;
-        }
-      }
-    }
-
     users.forEach(u => {
       u.cells.forEach(c => {
         if (c.mass * (1 - (Config.massLossRate / 1000)) > Config.defaultPlayerMass && u.massTotal > Config.minMassLoss) {
@@ -559,76 +528,24 @@ function gameLoop() {
   }
 
 */
+
   balanceMass();
 }
 
 function sendUpdates() {
+  var leaderboard = Player.leaderboard;
   Config.gameBoard.objects.forEach(function(object) {
     if (object.type === 'player') {
-console.log("--sendUpdates loop for: " + object.id + "," + object.type);
-/*
-      // center the view if x/y is undefined, this will happen for spectators
-      u.x = u.x || Config.gameWidth / 2;
-      u.y = u.y || Config.gameHeight / 2;
-
-      const visibleFood  = food
-          .filter(f => f.x > u.x - u.w / 2 - 20 &&
-          f.x < u.x + u.w / 2 + 20 &&
-          f.y > u.y - u.h / 2 - 20 &&
-          f.y < u.y + u.h / 2 + 20 );
-
-      const visibleVirus  = virus
-          .filter(f => f.x > u.x - u.w / 2 - f.radius &&
-          f.x < u.x + u.w / 2 + f.radius &&
-          f.y > u.y - u.h / 2 - f.radius &&
-          f.y < u.y + u.h / 2 + f.radius );
-
-      const visibleBots  = bots
-          .filter(f => f.x > u.x - u.w / 2 - f.radius &&
-          f.x < u.x + u.w / 2 + f.radius &&
-          f.y > u.y - u.h / 2 - f.radius &&
-          f.y < u.y + u.h / 2 + f.radius );
-
-      const visibleMass = massFood
-          .filter(f => f.x + f.radius > u.x - u.w / 2 - 20 &&
-          f.x - f.radius < u.x + u.w / 2 + 20 &&
-          f.y + f.radius > u.y - u.h / 2 - 20 &&
-          f.y - f.radius < u.y + u.h / 2 + 20 );
-
-      const visibleCells = users
-        .map(f => {
-          return {
-            id: f.id !== u.id ? f.id : undefined,
-            x: Math.round(f.x),
-            y: Math.round(f.y),
-            cells: f.cells.filter(c => {
-              return c.x + c.radius > u.x - u.w / 2 - 20 &&
-                c.x - c.radius < u.x + u.w / 2 + 20 &&
-                c.y + c.radius > u.y - u.h / 2 - 20 &&
-                c.y - c.radius < u.y + u.h / 2 + 20;
-            }).map(c => {
-              return Object.assign(c, {
-                x: Math.round(c.x),
-                y: Math.round(c.y),
-                mass: Math.round(c.mass),
-                radius: Math.round(c.radius)
-              });
-            }),
-            massTotal: Math.round(f.massTotal),
-            hue: f.hue,
-            name: f.name
-          };
-        });
-*/
       let visibleObjects = Config.gameBoard.find({x: object.x - object.w/2, y: object.y - object.h/2, w: object.w, h: object.h});
-console.dir(visibleObjects);
+//console.dir(visibleObjects);
       object.socket.emit(GameEvents.serverTellPlayerMove, visibleObjects);
-      if (leaderboardChanged) {
-        object.socket.emit(GameEvents.leaderboard, { players: users.length, leaderboard: leaderboard });
+
+      if (leaderboard.dirty) {
+        object.socket.emit(GameEvents.leaderboard, { players: Player.count, leaderboard: leaderboard.leaders });
       }
     }
   });
-  leaderboardChanged = false;
+  leaderboard.clearDirty();
 }
 
 setInterval(moveLoop, 1000 / 60);

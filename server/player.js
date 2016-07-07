@@ -52,6 +52,15 @@ class Player extends GameObject {
     Config.gameBoard.insert(this);
     totalCount++;
   }
+
+  set name(value) {
+    this._name = value;
+    leaders.update(this);  // Update scores to show the new name
+  }
+
+  get name() {
+    return this._name;
+  }
   
   // TODO: Rename to mass?
   set massTotal(x) {
