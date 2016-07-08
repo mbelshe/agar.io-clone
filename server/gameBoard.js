@@ -41,12 +41,10 @@ console.log("GAMEBOARD: New Object " + gameObject.id + ', ' +  gameObject.x + ',
       return false;
     }
 
-    // Search the entire game board for the 'id' and remove it.
-    // TODO:  If this returns all objects (searching the entire gameboard), then this is very inefficient.
-    let region = {x: 0, y: 0, w: Config.gameWidth, h: Config.gameHeight, id: id};
-    this.qt.remove(region, 'id');
-
+    var objToRemove = this.gameObjects[id];
+    this.qt.remove(objToRemove, 'id');
     delete this.gameObjects[id];
+
     return true;
   }
 
