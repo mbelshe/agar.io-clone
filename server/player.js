@@ -29,7 +29,7 @@ class Player extends GameObject {
     this.socket = socket;
     this.name = name;
     this.type = 'player';
-    this.radius = Util.massToRadius(Config.defaultPlayerMass);
+    this.radius = Util.massToRadius(Config.defaultPlayerMass);  // TODO:  why does a player (rather than a cell) have a radius?
     this.cells = [{
       mass: Config.defaultPlayerMass,
       x: position.x,
@@ -37,7 +37,7 @@ class Player extends GameObject {
       radius: this.radius,
       speed: Config.initialSpeed
     }];
-    this.massTotal = Config.defaultPlayerMass;
+    this._mass = Config.defaultPlayerMass;
     this.admin = false;
     this.x = position.x;
     this.y = position.y;
@@ -62,23 +62,23 @@ class Player extends GameObject {
     return this._name;
   }
   
-  // TODO: Rename to mass?
-  set massTotal(x) {
-    if (!this._massTotal) {  // may have been undefined
-      this._massTotal = 0;
+  set mass(x) {
+    if (!this._mass) {  // may have been undefined
+      this._mass = 0;
     }
-    totalMass += (x - this._massTotal);
-    this._massTotal = x;
+    totalMass += (x - this._mass);
+    this._mass = x;
+    this.radius = Util.massToRadius(this._mass);
     leaders.update(this);
   };
 
-  get massTotal() {
-    return this._massTotal;
+  get mass() {
+    return this._mass;
   }
 
   die() {
-    totalMass -= this._massTotal;
-    this._massTotal = 0;
+    totalMass -= this._mass;
+    this._mass = 0;
     totalCount--;
     Config.gameBoard.remove(this.id);
     leaders.remove(this);
@@ -183,7 +183,7 @@ class Player extends GameObject {
       type: this.type,
       radius: this.radius,
       cells: this.cells,
-      massTotal: this.massTotal,
+      mass: this.mass,
       x: this.x,
       y: this.y,
       w: this.w,

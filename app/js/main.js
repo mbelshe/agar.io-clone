@@ -280,9 +280,9 @@ function setupSocket() {
     for (let i = 0; i < leaderboard.length; i++) {
       status += '<br />';
       if (isCurrentPlayer(leaderboard[i].id)) {
-        status += leaderboard[i].name.length !== 0 ? `<span class="me">${(i + 1)}. ${leaderboard[i].name}</span>` : `<span class="me">${(i + 1)}. An unnamed cell</span>`;
+        status += leaderboard[i].name.length !== 0 ? `<span class="me">${(i + 1)}. ${leaderboard[i].name} ${leaderboard[i].score}</span>` : `<span class="me">${(i + 1)}. An unnamed cell</span>`;
       } else {
-        status += leaderboard[i].name.length !== 0 ? `${(i + 1)}. ${leaderboard[i].name}` : `${(i + 1)}. An unnamed cell`;
+        status += leaderboard[i].name.length !== 0 ? `${(i + 1)}. ${leaderboard[i].name}` : `${(i + 1)}. An unnamed cell ${leaderboard[i].score}`;
       }
     }
     status += '<br />Players: ' + data.players;
@@ -314,7 +314,7 @@ function setupSocket() {
       player.x = playerData.x;
       player.y = playerData.y;
       player.hue = playerData.hue;
-      player.massTotal = playerData.massTotal;
+      player.mass = playerData.mass;
       player.cells = playerData.cells;
       player.xoffset = isNaN(xoffset) ? 0 : xoffset;
       player.yoffset = isNaN(yoffset) ? 0 : yoffset;

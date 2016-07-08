@@ -28,11 +28,11 @@ class Leaderboard {
 
     for (let index = 0; index < this.leaders.length; ++index) {
       let leader = this.leaders[index];
-      if (leader.score < player.massTotal) {
+      if (leader.score < player.mass) {
         var newLeader = {
           id: player.id,
           name: player.name,
-          score: player.massTotal
+          score: player.mass
         };
         this.leaders.splice(index, 0, newLeader);  // Insert into the list.
         this._dirty = true;
@@ -46,7 +46,7 @@ class Leaderboard {
       var newLeader = {
         id: player.id,
         name: player.name,
-        score: player.massTotal
+        score: player.mass
       };
       this.leaders.push(newLeader);
       this._dirty = true;

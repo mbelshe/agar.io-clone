@@ -362,24 +362,36 @@ function tickPlayer(player) {
   }
   player.move();
 
-  // Create a square around the user's circle.
-  var playerBox = {
-    x: player.x - (player.radius / 2),
-    y: player.y - (player.radius / 2),
-    w: player.radius * 2,
-    h: player.radius * 2
-  };
-  let collissions = Config.gameBoard.find(playerBox);
-  collissions.forEach(function(object) {
-    if (object.type == 'player') {
-      if (object.id == player.id) {
-        return;   // don't collide with self.
+  player.cells.forEach(function(cell) {
+    // Create a square around the cell's circle.
+    let cellBox = {
+      x: cell.x - (cell.radius / 2),
+      y: cell.y - (cell.radius / 2),
+      w: cell.radius * 2,
+      h: cell.radius * 2
+    };
+    let cellCircle = new C( new V(cell.x, cell.y), cell.radius);
+
+    let collissions = Config.gameBoard.find(cellBox);
+    collissions.forEach(function(object) {
+      // Verify we have a real collission
+      let isCollission = SAT.pointInCircle(new V(object.x, object.y), cellCircle);
+      if (!isCollission) {
+        return;
       }
-      console.log("COLLIDING WITH PLAYER " + object.id);
-    } else if (object.type == 'food') {
-      console.log("COLLIDING WITH FOOD! " + object.id);
-      // 1. player.eat(object);
-    }
+
+      if (cell.mass > object.mass * 1.1  &&
+          cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.75) {
+        console.log("EATING " + object.type + ': ' + object.id);
+        object.eat();
+
+        // TODO:  Fix the relationship between player cells and mass.
+        //        Increasing mass of cell should automatically increase mass of player
+        cell.mass += object.mass;
+        player.mass += object.mass;
+console.log("ATE: " + object.mass + ", player is now: " + player.mass);
+      }
+    });
   });
 
 

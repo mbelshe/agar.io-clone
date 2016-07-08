@@ -24,6 +24,7 @@ class Food extends GameObject {
   }
 
   static removeFood(foodToRemove) {
+    // TODO: implement me
 /*
     while (foodToRemove--) {
       food.pop();
@@ -38,14 +39,18 @@ class Food extends GameObject {
     this.x = x;
     this.y = y;
     this.radius = Util.massToRadius(Config.foodMass);
-    this.mass = Config.foodMass;
+    this._mass = Config.foodMass;
     this.hue = Math.round(Math.random() * 360);
     Config.gameBoard.insert(this);
   }
 
+  get mass() {
+    return this._mass;
+  }
+
   eat() {
     foodCount--;
-    Config.gameBoard.insert(this.id);
+    Config.gameBoard.remove(this.id);
   }
 };
 
