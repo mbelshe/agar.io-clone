@@ -365,23 +365,23 @@ function tickPlayer(player) {
   player.cells.forEach(function(cell) {
     // Create a square around the cell's circle.
     let cellBox = {
-      x: cell.x - (cell.radius / 2),
-      y: cell.y - (cell.radius / 2),
+      x: cell.x - (cell.radius),
+      y: cell.y - (cell.radius),
       w: cell.radius * 2,
       h: cell.radius * 2
     };
     let cellCircle = new C( new V(cell.x, cell.y), cell.radius);
 
-    let collissions = Config.gameBoard.find(cellBox);
-    collissions.forEach(function(object) {
+    let collisions = Config.gameBoard.find(cellBox);
+    collisions.forEach(function(object) {
       // Verify we have a real collission
-      let isCollission = SAT.pointInCircle(new V(object.x, object.y), cellCircle);
-      if (!isCollission) {
+      let isCollision = SAT.pointInCircle(new V(object.x, object.y), cellCircle);
+      if (!isCollision) {
         return;
       }
 
       if (cell.mass > object.mass * 1.1  &&
-          cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.75) {
+          cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.1) {
         console.log("EATING " + object.type + ': ' + object.id);
         object.eat();
 

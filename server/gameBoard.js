@@ -5,6 +5,7 @@
 
 "use strict";
 
+
 import Config from '../config.json';
 import SimpleQuadTree from 'simple-quadtree';
 

@@ -277,15 +277,27 @@ function setupSocket() {
   socket.on(GameEvents.leaderboard , (data) => {
     leaderboard = data.leaderboard;
     let status = '<span class="title">Leaderboard</span>';
+    status += '<br />Players: ' + data.players;
+    status += '<br  />';
+   
     for (let i = 0; i < leaderboard.length; i++) {
       status += '<br />';
-      if (isCurrentPlayer(leaderboard[i].id)) {
-        status += leaderboard[i].name.length !== 0 ? `<span class="me">${(i + 1)}. ${leaderboard[i].name} ${leaderboard[i].score}</span>` : `<span class="me">${(i + 1)}. An unnamed cell</span>`;
-      } else {
-        status += leaderboard[i].name.length !== 0 ? `${(i + 1)}. ${leaderboard[i].name}` : `${(i + 1)}. An unnamed cell ${leaderboard[i].score}`;
+      var spanclass = '';
+      if (isCurrentPlayer(leaderboard[i].id)) {  
+        spanclass = 'me';
       }
+      
+      var name = 'An unnamed cell';
+      
+      if(!leaderboard[i].name.length  == 0) {
+        name = leaderboard[i].name;
+      }
+      
+      name += ' (' +  leaderboard[i].score + ')';
+      status += '<span class="' + spanclass + '">' + (i + 1) + '. ' + name + '</span>'; 
+     
     }
-    status += '<br />Players: ' + data.players;
+ 
     document.getElementById('status').innerHTML = status;
   });
 
@@ -601,9 +613,14 @@ function gameLoop() {
       if (borderDraw) {
         drawborder();
       }
-
+      
+      gameObjects.sort(function(obj1, obj2) {
+        return obj1.mass - obj2.mass;
+      });
+      
+      
       gameObjects.forEach(drawGameObject);
-
+      
 /*
       // Sort the users in order to display larger users "on top" of smaller users as they get eaten
       const orderMass = [];

@@ -25,11 +25,11 @@ class Food extends GameObject {
 
   static removeFood(foodToRemove) {
     // TODO: implement me
-/*
+
     while (foodToRemove--) {
       food.pop();
     }
-*/
+
   }
 
   constructor(x, y) {
@@ -51,6 +51,19 @@ class Food extends GameObject {
   eat() {
     foodCount--;
     Config.gameBoard.remove(this.id);
+  }
+  
+  toJSON() {
+    return {
+      type: this.type,
+      radius: this.radius,
+      mass: this.mass,
+      x: this.x,
+      y: this.y,
+      w: this.w,
+      h: this.h,
+      hue: this.hue,
+    };
   }
 };
 
