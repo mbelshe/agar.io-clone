@@ -536,10 +536,9 @@ console.log("ATE: " + object.mass + ", player is now: " + player.mass);
 }
 
 function moveLoop() {
-  Config.gameBoard.objects.forEach((u) => {
-    if (u.type == 'player') {
-      tickPlayer(u);
-    }
+  let allPlayers = Player.players;
+  Object.keys(allPlayers).forEach(function(key) {
+    tickPlayer(allPlayers[key]);
   });
 
   /*
@@ -568,17 +567,16 @@ function gameLoop() {
 }
 
 function sendUpdates() {
-  var leaderboard = Player.leaderboard;
-  // TODO: expensive to iterate all gameboard objects rather than all players
-  Config.gameBoard.objects.forEach(function(object) {
-    if (object.type === 'player') {
-      let visibleObjects = Config.gameBoard.find({x: object.x - object.w/2, y: object.y - object.h/2, w: object.w, h: object.h});
+  let leaderboard = Player.leaderboard;
+  let allPlayers = Player.players;
+  Object.keys(allPlayers).forEach(function(key) {
+    let player = allPlayers[key];
+    let visibleObjects = Config.gameBoard.find({x: player.x - player.w/2, y: player.y - player.h/2, w: player.w, h: player.h});
 //console.dir(visibleObjects);
-      object.socket.emit(GameEvents.serverTellPlayerMove, visibleObjects);
+    player.socket.emit(GameEvents.serverTellPlayerMove, player, visibleObjects);
 
-      if (leaderboard.dirty) {
-        object.socket.emit(GameEvents.leaderboard, { players: Player.count, leaderboard: leaderboard.leaders });
-      }
+    if (leaderboard.dirty) {
+      player.socket.emit(GameEvents.leaderboard, { players: Player.count, leaderboard: leaderboard.leaders });
     }
   });
   leaderboard.clearDirty();

@@ -311,14 +311,7 @@ function setupSocket() {
   });
 
   // Handle movement.
-  socket.on(GameEvents.serverTellPlayerMove, (viewableObjects) => {
-    let playerData = {};
-    for (let i = 0; i < viewableObjects.length; i++) {
-      if (isCurrentPlayer(viewableObjects[i].id)) {
-        playerData = viewableObjects[i];
-        break;
-      }
-    }
+  socket.on(GameEvents.serverTellPlayerMove, (playerData, viewableObjects) => {
     if (playerType === 'player') {
       xoffset = player.x - playerData.x;
       yoffset = player.y - playerData.y;

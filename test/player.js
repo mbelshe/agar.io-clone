@@ -23,7 +23,6 @@ describe('player.js', function() {
     it('should create a new player', function () {
       player = new Player(1, undefined, 'aniketh', {x: 0, y: 0});
       expect(player).to.not.be.undefined;
-console.dir(player);
       expect(Player.mass).to.be.eq(Config.defaultPlayerMass);
       expect(Player.count).to.be.eq(1);
     });
@@ -57,6 +56,20 @@ console.dir(player);
       player.resize(dim);
       expect(player.w).to.be.eq(dim.w);
       expect(player.h).to.be.eq(dim.h);
+    });
+
+    it('should have no active players', function() {
+      var allPlayers = Player.allPlayers;
+      expect(Object.keys(Player.players).length).to.be.eq(0);
+    });
+    it('spawn should create active players', function() {
+      player.spawn();
+      expect(Object.keys(Player.players).length).to.be.eq(1);
+      expect(Player.players[player.id]).to.not.be.undefined;
+    });
+    it('die should remove active players', function() {
+      player.die();
+      expect(Object.keys(Player.players).length).to.be.eq(0);
     });
   });
 

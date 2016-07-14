@@ -3,7 +3,6 @@
 import Cell from './cell';
 import Config from '../config.json';
 import Leaderboard from './leaderboard';
-import GameObject from './gameObject';
 import Util from './lib/util';
 
 const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
@@ -11,8 +10,9 @@ const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
 var totalMass = 0;
 var totalCount = 0;
 var leaders = new Leaderboard();
+var activePlayers = {};
 
-class Player extends GameObject {
+class Player {
   static get mass() {
     return totalMass;
   };
@@ -25,8 +25,14 @@ class Player extends GameObject {
     return leaders;
   }
 
+  // Returns a map of all active players.
+  // The map maps from player.id to the player object.
+  static get players() {
+    return activePlayers; 
+  }
+
   constructor(id, socket, name, position) {
-    super(id);
+    this.id = id;
     this.socket = socket;
     this.name = name;
     this.type = 'player';
@@ -77,15 +83,15 @@ class Player extends GameObject {
   }
 
   spawn() {
-    Config.gameBoard.insert(this);
+    activePlayers[this.id] = this;
   }
 
   die() {
     totalMass -= this._mass;
     this._mass = 0;
     totalCount--;
-    Config.gameBoard.remove(this.id);
     leaders.remove(this);
+    delete activePlayers[this.id];
   };
 
   heartbeat(target) {
@@ -98,7 +104,6 @@ class Player extends GameObject {
 
   resize(dim) {
     var newPosition = { h: dim.h, w: dim.w };
-    Config.gameBoard.update(this, newPosition);
     this.w = dim.w;
     this.h = dim.h;
   };
@@ -160,7 +165,6 @@ class Player extends GameObject {
     });
 
     var newPosition = { x: x / this.cells.length, y: y / this.cells.length };
-    Config.gameBoard.update(this, newPosition);
     this.x = newPosition.x;
     this.y = newPosition.y;
   };
