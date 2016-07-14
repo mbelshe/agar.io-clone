@@ -1,9 +1,10 @@
 "use strict";
 
+import Cell from './cell';
 import Config from '../config.json';
-import Util from './lib/util';
-import GameObject from './gameObject';
 import Leaderboard from './leaderboard';
+import GameObject from './gameObject';
+import Util from './lib/util';
 
 const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
 
@@ -29,28 +30,27 @@ class Player extends GameObject {
     this.socket = socket;
     this.name = name;
     this.type = 'player';
-    this.radius = Util.massToRadius(Config.defaultPlayerMass);  // TODO:  why does a player (rather than a cell) have a radius?
-    this.cells = [{
-      mass: Config.defaultPlayerMass,
-      x: position.x,
-      y: position.y,
-      radius: this.radius,
-      speed: Config.initialSpeed
-    }];
-    this._mass = Config.defaultPlayerMass;
+    this.cells = [];
+    this.mass = Config.defaultPlayerMass;
     this.admin = false;
+
+    // The x/y/w/h is the user's view into the gameboard
     this.x = position.x;
     this.y = position.y;
     this.w = Config.gameWidth;
     this.h = Config.gameHeight;
+
     this.hue = Math.round(Math.random() * 360);
     this.lastHeartBeat = +new Date();
     this.target = {
       x: 0,
       y: 0
     };
-    Config.gameBoard.insert(this);
     totalCount++;
+
+    let firstCell = new Cell(this, position.x, position.y,
+                             Config.defaultPlayerMass, Config.initialSpeed, this.hue);
+    this.cells.push(firstCell);
   }
 
   set name(value) {
@@ -76,6 +76,10 @@ class Player extends GameObject {
     return this._mass;
   }
 
+  spawn() {
+    Config.gameBoard.insert(this);
+  }
+
   die() {
     totalMass -= this._mass;
     this._mass = 0;
@@ -93,6 +97,8 @@ class Player extends GameObject {
   };
 
   resize(dim) {
+    var newPosition = { h: dim.h, w: dim.w };
+    Config.gameBoard.update(this, newPosition);
     this.w = dim.w;
     this.h = dim.h;
   };
@@ -104,31 +110,11 @@ class Player extends GameObject {
     this.cells.forEach((cell, i) => {
       const target = {
         x: this.x - cell.x + this.target.x,
-        y: this.y - cell.y + this.target.y
+        y: this.y - cell.y + this.target.y,
       };
-      const dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
-      const deg = Math.atan2(target.y, target.x);
-      let slowDown = 1;
-      if (cell.speed <= 6.25) {
-        slowDown = Util.log(cell.mass, Config.slowBase) - initMassLog + 1;
-      }
 
-      let deltaY = cell.speed * Math.sin(deg) / slowDown;
-      let deltaX = cell.speed * Math.cos(deg) / slowDown;
+      cell.move(target);
 
-      if (cell.speed > 6.25) {
-        cell.speed -= 0.5;
-      }
-      if (dist < (50 + cell.radius)) {
-        deltaY *= dist / (50 + cell.radius);
-        deltaX *= dist / (50 + cell.radius);
-      }
-      if (!isNaN(deltaY)) {
-        cell.y += deltaY;
-      }
-      if (!isNaN(deltaX)) {
-        cell.x += deltaX;
-      }
       // Find best solution.
       this.cells.forEach((c, j) => {
         if (j !== i && cell !== undefined) {
@@ -172,17 +158,19 @@ class Player extends GameObject {
         y += cell.y;
       }
     });
-    this.x = x / this.cells.length;
-    this.y = y / this.cells.length;
+
+    var newPosition = { x: x / this.cells.length, y: y / this.cells.length };
+    Config.gameBoard.update(this, newPosition);
+    this.x = newPosition.x;
+    this.y = newPosition.y;
   };
 
   // Return the client's representation of the Player object
   toJSON() {
     return {
       name: this.name,
+      id: this.id,
       type: this.type,
-      radius: this.radius,
-      cells: this.cells,
       mass: this.mass,
       x: this.x,
       y: this.y,

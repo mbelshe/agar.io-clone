@@ -30,7 +30,6 @@ describe('gameBoard.js', function () {
     it('should insert another object', function () {
       let obj = new GameObject(2);
       obj.x = obj.y = 20;
-console.dir(obj);
       expect(gb.insert(obj)).to.be.true;
       let objects = gb.objects;
       expect(objects.length).to.be.eq(2);

@@ -28,10 +28,23 @@ class GameBoard {
     if (this.gameObjects[gameObject.id] != undefined) {
       return false;
     }
-console.log("GAMEBOARD: New Object " + gameObject.id + ', ' +  gameObject.x + ', ' + gameObject.y + ', ' + gameObject.h + ', ' + gameObject.w);
     this.qt.put(gameObject);
     this.gameObjects[gameObject.id] = gameObject
     return true;
+  }
+
+  update(gameObject, position) {
+    if ((!position.x || position.x == gameObject.x) &&
+        (!position.y || position.y == gameObject.y) &&
+        (!position.h || position.h == gameObject.h) &&
+        (!position.w || position.w == gameObject.w)) {
+      return;
+    }
+
+    // TODO: Fix the quadtree.  The simple-quadtree library has bugs in update.
+    // this.qt.update(gameObject, 'id', position);
+    this.qt.remove(gameObject, 'id');
+    this.qt.put(gameObject);
   }
 
   // Remove a GameObject to the board.

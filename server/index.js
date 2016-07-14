@@ -166,7 +166,7 @@ io.on("connection", (socket) => {
     console.log(`[INFO] Player ${player.name} connecting!`);
 
     if (Config.gameBoard.findObjectById(player.id)) {
-      console.log('[INFO] Player ID is already connected, kicking.');
+      console.log('[INFO] Player ' + player.id + ' is already connected, kicking.');
       socket.disconnect();
     } else if (!Util.validNick(player.name)) {
       socket.emit(GameEvents.kick, 'Invalid username.');
@@ -174,6 +174,7 @@ io.on("connection", (socket) => {
     } else {
       console.log(`[INFO] Player ${player.name} connected!`);
       currentPlayer.name = player.name;
+      currentPlayer.spawn();
 
       io.emit(GameEvents.playerJoin, { name: currentPlayer.name });
 
@@ -568,6 +569,7 @@ function gameLoop() {
 
 function sendUpdates() {
   var leaderboard = Player.leaderboard;
+  // TODO: expensive to iterate all gameboard objects rather than all players
   Config.gameBoard.objects.forEach(function(object) {
     if (object.type === 'player') {
       let visibleObjects = Config.gameBoard.find({x: object.x - object.w/2, y: object.y - object.h/2, w: object.w, h: object.h});

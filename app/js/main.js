@@ -539,6 +539,96 @@ function drawPlayer(playerToDraw) {
   });
 }
 
+function drawCell(cell) {
+  const playerToDraw = cell.player;
+  const start = {
+    x: player.x - (screenWidth / 2),
+    y: player.y - (screenHeight / 2)
+  };
+
+  let x = 0;
+  let y = 0;
+
+  const points = 30 + ~~(cell.mass / 5);
+  const increase = Math.PI * 2 / points;
+
+  graph.strokeStyle = `hsl(${playerToDraw.hue}, 100%, 45%)`;
+  graph.fillStyle = `hsl(${playerToDraw.hue}, 100%, 50%)`;
+  graph.lineWidth = playerConfig.border;
+
+  const xstore = [];
+  const ystore = [];
+
+  spin += 0.0;
+
+  const circle = {
+    x: cell.x - start.x,
+    y: cell.y - start.y
+  };
+
+  for (let i = 0; i < points; i++) {
+    x = cell.radius * Math.cos(spin) + circle.x;
+    y = cell.radius * Math.sin(spin) + circle.y;
+    if (!isCurrentPlayer(playerToDraw.id)) {
+      x = valueInRange(-playerToDraw.x + screenWidth / 2, gameWidth - playerToDraw.x + screenWidth / 2, x);
+      y = valueInRange(-playerToDraw.y + screenHeight / 2, gameHeight - playerToDraw.y + screenHeight / 2, y);
+    } else {
+      x = valueInRange(-cell.x - player.x + screenWidth / 2 + (cell.radius / 3), gameWidth - cell.x + gameWidth - player.x + screenWidth / 2 - (cell.radius / 3), x);
+      y = valueInRange(-cell.y - player.y + screenHeight / 2 + (cell.radius / 3), gameHeight - cell.y + gameHeight - player.y + screenHeight / 2 - (cell.radius / 3), y);
+    }
+    spin += increase;
+    xstore[i] = x;
+    ystore[i] = y;
+  }
+  /* if (wiggle >= player.radius/ 3) inc = -1;
+  *if (wiggle <= player.radius / -3) inc = +1;
+  *wiggle += inc;
+  */
+  for (let i = 0; i < points; ++i) {
+    if (i === 0) {
+      graph.beginPath();
+      graph.moveTo(xstore[i], ystore[i]);
+    } else if (i > 0 && i < points - 1) {
+      graph.lineTo(xstore[i], ystore[i]);
+    } else {
+      graph.lineTo(xstore[i], ystore[i]);
+      graph.lineTo(xstore[0], ystore[0]);
+    }
+  }
+  graph.lineJoin = 'round';
+  graph.lineCap = 'round';
+  graph.fill();
+  graph.stroke();
+  let nameCell = '';
+  if (isCurrentPlayer(playerToDraw.id)) {
+    nameCell = player.name;
+  } else {
+    nameCell = playerToDraw.name;
+  }
+
+  let fontSize = Math.max(cell.radius / 3, 12);
+  graph.lineWidth = playerConfig.textBorderSize;
+  graph.fillStyle = playerConfig.textColor;
+  graph.strokeStyle = playerConfig.textBorder;
+  graph.miterLimit = 1;
+  graph.lineJoin = 'round';
+  graph.textAlign = 'center';
+  graph.textBaseline = 'middle';
+  graph.font = `bold ${fontSize}px sans-serif`;
+
+  if (toggleMassState === 0) {
+    graph.strokeText(nameCell, circle.x, circle.y);
+    graph.fillText(nameCell, circle.x, circle.y);
+  } else {
+    graph.strokeText(nameCell, circle.x, circle.y);
+    graph.fillText(nameCell, circle.x, circle.y);
+    graph.font = `bold ${Math.max(fontSize / 3 * 2, 10)}px sans-serif`;
+    if (nameCell.length === 0) fontSize = 0;
+    graph.strokeText(Math.round(cell.mass), circle.x, circle.y + fontSize);
+    graph.fillText(Math.round(cell.mass), circle.x, circle.y + fontSize);
+  }
+}
+
 // drawGameObject
 // Draw's a single game object based on type.  In the future we can make this more object oriented.
 function drawGameObject(obj) {
@@ -546,7 +636,9 @@ function drawGameObject(obj) {
   //console.dir(obj);
 
   if (obj.type == 'player') {
-    drawPlayer(obj);
+    //drawPlayer(obj);
+  } else if (obj.type == 'cell') {
+    drawCell(obj);
   } else if (obj.type == 'food') {
     drawFood(obj);
   }
