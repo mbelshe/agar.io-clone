@@ -24,6 +24,22 @@ class Cell extends GameObject {
     Config.gameBoard.insert(this);
   }
 
+  // Set cell mass.
+  // Also update's the cell's player's mass.
+  set mass(x) {
+    if (!this._mass) {  // may have been undefined
+      this._mass = 0;
+    }
+    let delta = x - this._mass;
+    this._mass = x;
+    this.radius = Util.massToRadius(this._mass);
+    this.player.mass += delta;
+  };
+
+  get mass() {
+    return this._mass;
+  }
+
   die() {
     Config.gameBoard.remove(this.id);
 
@@ -70,7 +86,7 @@ class Cell extends GameObject {
       id: this.id,
       player: this.player,
       type: this.type,
-      mass: this.mass,
+      mass: this._mass,
       radius: this.radius,
       x: this.x,
       y: this.y,

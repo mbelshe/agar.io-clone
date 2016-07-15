@@ -374,12 +374,10 @@ function tickPlayer(player) {
       if (cell.mass > object.mass * 1.1  &&
           cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.1) {
         console.log("EATING " + object.type + ': ' + object.id);
-        object.eat();
 
-        // TODO:  Fix the relationship between player cells and mass.
-        //        Increasing mass of cell should automatically increase mass of player
+        // Shouldn't the eat() method automatically take care of the mass changes?
+        object.eat();
         cell.mass += object.mass;
-        player.mass += object.mass;
 console.log("ATE: " + object.mass + ", player is now: " + player.mass);
       }
     });

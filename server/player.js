@@ -70,7 +70,6 @@ class Player {
     }
     totalMass += (x - this._mass);
     this._mass = x;
-    this.radius = Util.massToRadius(this._mass);
     leaders.update(this);
   };
 
