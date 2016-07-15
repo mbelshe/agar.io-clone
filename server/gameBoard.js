@@ -33,6 +33,9 @@ class GameBoard {
     return true;
   }
 
+  // Update the gameObject.
+  // gameObject's x/y/h/w must exactly match the prior value already in the quadtree.
+  // After this function is called, gameObject's x/y/h/w will be set to position.
   update(gameObject, position) {
     if ((!position.x || position.x == gameObject.x) &&
         (!position.y || position.y == gameObject.y) &&
@@ -44,6 +47,18 @@ class GameBoard {
     // TODO: Fix the quadtree.  The simple-quadtree library has bugs in update.
     // this.qt.update(gameObject, 'id', position);
     this.qt.remove(gameObject, 'id');
+    if (position.x) {
+      gameObject.x = position.x;
+    }
+    if (position.y) {
+      gameObject.y = position.y;
+    }
+    if (position.h) {
+      gameObject.h = position.h;
+    }
+    if (position.w) {
+      gameObject.w = position.w;
+    }
     this.qt.put(gameObject);
   }
 
