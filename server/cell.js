@@ -42,8 +42,7 @@ class Cell extends GameObject {
   
   die() {
     Config.gameBoard.remove(this.id);
-
-    // TODO:  Tell Player object that cell died?
+    this.player.onCellDied(this);
   }
 
   move(target) {

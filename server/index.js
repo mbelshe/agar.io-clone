@@ -380,10 +380,10 @@ function tickPlayer(player) {
         //TODO: Add virus(splitCell) implementation here
         
         if (object.type == 'food') {
-            object.eat();
-         } else if (object.type == 'cell') {
-            object.die();
-         }
+          object.eat();
+        } else if (object.type == 'cell') {
+          object.die();
+        }
         cell.mass += object.mass;
         
 console.log("ATE: " + object.mass + ", player is now: " + player.mass);
@@ -534,7 +534,10 @@ console.log("ATE: " + object.mass + ", player is now: " + player.mass);
 function moveLoop() {
   let allPlayers = Player.players;
   Object.keys(allPlayers).forEach(function(key) {
-    tickPlayer(allPlayers[key]);
+    let player = allPlayers[key];
+    if (player !== undefined) {   // Check undefined because the player could be eaten as part of this iteration.
+      tickPlayer(allPlayers[key]);
+    }
   });
 
   /*

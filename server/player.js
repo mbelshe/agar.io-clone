@@ -92,19 +92,34 @@ class Player {
       console.log("ERROR: Player.die() called for player already dead.");
     }
 
-    // Remove from global counters and set mass to zero.
-    totalCount--;
-    this.mass = 0;
-
-    // Remove from leaderboard.
-    leaders.remove(this);
-
-    // Remove from active players list.
-    delete activePlayers[this.id];
-
     // Remove all cells from gameboard.
-    this.cells.forEach(function(cell) { cell.die(); });
-    this.cells = [];
+    if (this.cells.length > 0) {
+      this.cells.forEach(function(cell) { cell.die(); });
+      this.cells = [];
+    }
+  };
+
+  onCellDied(deadCell) {
+    // iterate the list of cells and find the dead cell
+    for (let index = 0; index < this.cells.length; ++index) {
+      if (this.cells[index].id == deadCell.id) {
+        this.cells.splice(index, 1);
+        break;
+      }
+    }
+    if (this.cells.length == 0) {
+      // Remove from global counters and set mass to zero.
+      totalCount--;
+      this.mass = 0;
+
+      // Remove from leaderboard.
+      leaders.remove(this);
+
+      // Remove from active players list.
+      delete activePlayers[this.id];
+
+      this.socket.emit('RIP');
+    }
   };
 
   heartbeat(target) {
@@ -186,7 +201,7 @@ class Player {
   toJSON() {
     return {
       name: this.name,
-      id: this.id,
+      id: this.id,            // LEAKING ID IS A SECURITY HOLE
       type: this.type,
       mass: this.mass,
       x: this.x,
