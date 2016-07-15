@@ -44,14 +44,6 @@ const io = (IO)(http);
 // We store the gameboard in the configuration.
 Config.gameBoard = new GameBoard();
 
-/*
-const users = [];
-const massFood = [];
-const food = [];
-const virus = [];
-const bots = [];
-*/
-
 const V = SAT.Vector;
 const C = SAT.Circle;
 
@@ -216,9 +208,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (Config.gameBoard.findObjectById(currentPlayer.id)) {
-      Config.gameBoard.remove(currentPlayer.id);
-    }
+    currentPlayer.die();
     console.log(`[INFO] User ${currentPlayer.name} disconnected!`);
     socket.broadcast.emit(GameEvents.playerDisconnect, { name: currentPlayer.name });
   });

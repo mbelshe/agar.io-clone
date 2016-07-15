@@ -37,7 +37,7 @@ class Player {
     this.name = name;
     this.type = 'player';
     this.cells = [];
-    this.mass = Config.defaultPlayerMass;
+    this.mass = 0;
     this.admin = false;
 
     // The x/y/w/h is the user's view into the gameboard
@@ -53,10 +53,6 @@ class Player {
       y: 0
     };
     totalCount++;
-
-    let firstCell = new Cell(this, position.x, position.y,
-                             Config.defaultPlayerMass, Config.initialSpeed, this.hue);
-    this.cells.push(firstCell);
   }
 
   set name(value) {
@@ -83,15 +79,33 @@ class Player {
   }
 
   spawn() {
+    // Create our first cell.
+    let firstCell = new Cell(this, this.x, this.y, Config.defaultPlayerMass, Config.initialSpeed, this.hue);
+    this.cells.push(firstCell);
+    this.mass = Config.defaultPlayerMass;
+
+    // Add to global tables.
     activePlayers[this.id] = this;
   }
 
   die() {
-    totalMass -= this._mass;
-    this._mass = 0;
+    if (activePlayers[this.id] == undefined) {
+      console.log("ERROR: Player.die() called for player already dead.");
+    }
+
+    // Remove from global counters and set mass to zero.
     totalCount--;
+    this.mass = 0;
+
+    // Remove from leaderboard.
     leaders.remove(this);
+
+    // Remove from active players list.
     delete activePlayers[this.id];
+
+    // Remove all cells from gameboard.
+    this.cells.forEach(function(cell) { cell.die(); });
+    this.cells = [];
   };
 
   heartbeat(target) {
