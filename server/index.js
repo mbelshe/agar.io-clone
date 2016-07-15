@@ -349,6 +349,7 @@ function tickPlayer(player) {
 
   if (player.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
     player.socket.emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
+    player.die();
     player.socket.disconnect();
   }
   player.move();
@@ -376,8 +377,15 @@ function tickPlayer(player) {
         console.log("EATING " + object.type + ': ' + object.id);
 
         // Shouldn't the eat() method automatically take care of the mass changes?
-        object.eat();
+        //TODO: Add virus(splitCell) implementation here
+        
+        if (object.type == 'food') {
+            object.eat();
+         } else if (object.type == 'cell') {
+            object.die();
+         }
         cell.mass += object.mass;
+        
 console.log("ATE: " + object.mass + ", player is now: " + player.mass);
       }
     });

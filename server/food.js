@@ -24,7 +24,6 @@ class Food extends GameObject {
   }
 
   static removeFood(foodToRemove) {
-    // TODO: implement me
 
     while (foodToRemove--) {
       food.pop();

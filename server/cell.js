@@ -39,7 +39,7 @@ class Cell extends GameObject {
   get mass() {
     return this._mass;
   }
-
+  
   die() {
     Config.gameBoard.remove(this.id);
 
