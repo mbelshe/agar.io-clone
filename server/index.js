@@ -150,7 +150,7 @@ function balanceMass() {
 }
 
 io.on("connection", (socket) => {
-  console.log('A user connected!', socket.handshake.query.type);
+ // console.log('A user connected!', socket.handshake.query.type);
 
   let currentPlayer;
 
@@ -343,16 +343,14 @@ function moveBot() {
   });
 }
 
-function tickPlayer(player) {
-  // TODO: THIS SHOULD NOT HAVE TO BE DECLARED HERE FIX SCOPE
-  let z = 0;
-
+function tickPlayer(player) {  
   if (player.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
-    player.socket.emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
-    player.die();
-    player.socket.disconnect();
+     player.socket.emit(GameEvents.kick, `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
+     player.die();
+     player.socket.disconnect();
   }
   player.move();
+  
 
   player.cells.forEach(function(cell) {
     // Create a square around the cell's circle.
@@ -383,6 +381,7 @@ function tickPlayer(player) {
             object.eat();
          } else if (object.type == 'cell') {
             object.die();
+            console.log("player died");
          }
         cell.mass += object.mass;
         
@@ -533,8 +532,11 @@ console.log("ATE: " + object.mass + ", player is now: " + player.mass);
 
 function moveLoop() {
   let allPlayers = Player.players;
-  Object.keys(allPlayers).forEach(function(key) {
-    tickPlayer(allPlayers[key]);
+  Object.keys(allPlayers).forEach(function(key) { 
+    let currentPlayer = allPlayers[key];
+   if(currentPlayer != undefined) {
+    tickPlayer(allPlayers[key]); 
+   }
   });
 
   /*

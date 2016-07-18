@@ -103,8 +103,8 @@ class Player {
     delete activePlayers[this.id];
 
     // Remove all cells from gameboard.
-    this.cells.forEach(function(cell) { cell.die(); });
-    this.cells = [];
+  //  this.cells.forEach(function(cell) { cell.die(); });
+  //  this.cells = [];
   };
 
   heartbeat(target) {
