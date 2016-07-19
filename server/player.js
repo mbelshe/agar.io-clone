@@ -118,8 +118,10 @@ class Player {
 
       // Remove from active players list.
       delete activePlayers[this.id];
-
-      this.socket.emit(GameEvents.RIP);
+      
+      if(this.socket) {
+        this.socket.emit(GameEvents.RIP);
+      }
     }
   };
 
