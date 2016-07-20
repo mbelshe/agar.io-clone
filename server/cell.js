@@ -68,11 +68,9 @@ class Cell extends GameObject {
     }
     var newPosition = {};
     if (!isNaN(deltaY)) {
-      this.y += deltaY;
       newPosition.y = this.y + deltaY;
     }
     if (!isNaN(deltaX)) {
-      this.x += deltaX;
       newPosition.x = this.x + deltaX;
     }
     Config.gameBoard.update(this, newPosition);
