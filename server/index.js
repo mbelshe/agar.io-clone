@@ -383,7 +383,6 @@ function tickPlayer(player) {
           object.die();
         }
         cell.mass += object.mass;
-        console.log("Player score: " + player.score);
         player.socket.emit(GameEvents.playerScore, player.mass);
         
 console.log("ATE: " + object.mass + ", player is now: " + player.mass);
