@@ -18,7 +18,7 @@ describe('player.js', function() {
     it('should have zero totals to start', function() {
       expect(Player.mass).to.be.eq(0);
       expect(Player.count).to.be.eq(0);
-    });
+    });  
 
     it('should create a new player', function () {
       player = new Player(1, undefined, 'aniketh', {x: 0, y: 0});

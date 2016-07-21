@@ -538,6 +538,8 @@ function drawGameObject(obj) {
     drawCell(obj);
   } else if (obj.type == 'food') {
     drawFood(obj);
+  } else if (obj.type == 'virus') {
+    drawVirus(obj);
   }
 }
 

@@ -6,6 +6,7 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from '../webpack.config.js';
 import Food from './food';
 import Player from './player';
+import Virus from './virus';
 import GameBoard from './gameBoard';
 import GameEvents from './gameEvents.js';
 import GameObjectType from './gameObjectType.js';
@@ -122,6 +123,7 @@ function balanceMass() {
   const foodDiff = parseInt(massDiff / Config.foodMass, 10) - maxFoodDiff;
   const foodToAdd = Math.min(foodDiff, maxFoodDiff);
   const foodToRemove = -Math.max(foodDiff, maxFoodDiff);
+  const virusToAdd = Config.virus.maxVirus - Virus.count;
 
   if (foodToAdd > 0) {
     console.log('[DEBUG] Adding ' + foodToAdd + ' food to level!');
@@ -133,13 +135,12 @@ function balanceMass() {
     console.log('[DEBUG] Mass rebalanced!');
   }
 
-/*
-  const virusToAdd = Config.virus.maxVirus - virus.length;
-
-  if (virusToAdd > 0) {
-    addVirus(virusToAdd);
+  if(virusToAdd > 0) {
+    console.log('[DEBUG] Adding ' + virusToAdd + ' virus to level!');
+    Virus.addVirus(virusToAdd);
   }
 
+/*
   if (Config.bots.active) {
     const botToAdd = Config.bots.maxBot - bots.length;
     if (botToAdd > 0) {
