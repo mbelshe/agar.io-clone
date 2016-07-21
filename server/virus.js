@@ -34,7 +34,6 @@ class Virus extends GameObject {
 		this.fill = Config.virus.fill;
 		this.stroke = Config.virus.stroke;
 		this.strokeWidth = Config.virus.strokeWidth;
-
 	}
 
   	toJSON() {
@@ -49,14 +48,5 @@ class Virus extends GameObject {
       strokeWidth: this.strokeWidth,
     };
   }
-
-
-
-
-
-
-
-
-
 };
 export default Virus;

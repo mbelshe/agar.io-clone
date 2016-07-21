@@ -22,13 +22,5 @@ var expect = require('chai').expect;
  			expect(virus.x).to.be.eq(1234);
  			expect(virus.y).to.be.eq(987);
  		});
-
-
-
-
  	});
-
-
-
-
  });
