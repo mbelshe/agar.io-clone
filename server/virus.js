@@ -34,6 +34,7 @@ class Virus extends GameObject {
 		this.fill = Config.virus.fill;
 		this.stroke = Config.virus.stroke;
 		this.strokeWidth = Config.virus.strokeWidth;
+		Config.gameBoard.insert(this);
 	}
 
   	toJSON() {
