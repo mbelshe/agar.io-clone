@@ -1,3 +1,5 @@
+"use strict";
+
 console.log('[STARTING SERVER]');
 import express from 'express';
 import webpack from 'webpack';
@@ -293,17 +295,20 @@ io.on("connection", (socket) => {
     currentPlayer.fireFood(massFood);
   });
 
-  socket.on(GameEvents.virusSplit, (virusCell) => {
+  socket.on(GameEvents.virusSplit, (virusCellIndex) => {
     if (!currentPlayer) {
       return;
     }
-
+   // console.log("currentPlayer is true");
     if (currentPlayer.canSplit()) {
       // Split single cell from virus
-      if (virusCell) {
-        currentPlayer.splitCell(currentPlayer.cells[virusCell]);
+     // console.log("Player can split");
+      if (virusCellIndex >= 0) {
+      //  console.log("Splitting a cell");
+        currentPlayer.splitCell(currentPlayer.cells[virusCellIndex]);
       } else {
         // Split all cells
+      //  console.log("Splitting all cells");
         currentPlayer.splitAllCells();
       }
       currentPlayer.lastSplit = new Date().getTime();
@@ -352,8 +357,9 @@ function tickPlayer(player) {
   }
   player.move();
   
-
+  let cellIndex = 0;
   player.cells.forEach(function(cell) {
+
     // Create a square around the cell's circle.
     let cellBox = {
       x: cell.x - (cell.radius),
@@ -373,22 +379,26 @@ function tickPlayer(player) {
 
       if (cell.mass > object.mass * 1.1  &&
           cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.1) {
-        console.log("EATING " + object.type + ': ' + object.id);
+        console.log("EATING/Split " + object.type + ': ' + object.id);
 
         // Shouldn't the eat() method automatically take care of the mass changes?
         //TODO: Add virus(splitCell) implementation here
-        
         if (object.type == 'food') {
           object.eat();
+          cell.mass += object.mass;
         } else if (object.type == 'cell') {
+          cell.mass += object.mass;
           object.die();
-        }
-        cell.mass += object.mass;
+        } else if (object.type == 'virus') {
+          player.socket.emit(GameEvents.virusSplit, cellIndex);
+        } 
+      
         player.socket.emit(GameEvents.playerScore, player.mass);
         
-console.log("ATE: " + object.mass + ", player is now: " + player.mass);
+//console.log("ATE: " + object.mass + ", player is now: " + player.mass);
       }
     });
+    cellIndex++;
   });
 
 

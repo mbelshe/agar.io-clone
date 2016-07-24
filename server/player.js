@@ -100,6 +100,25 @@ class Player {
     }
   };
 
+  canSplit() {
+    return this.cells.length < Config.limitSplit && this.mass >= Config.defaultPlayerMass * 2;
+  };
+
+  splitCell(cell) {
+    console.log("cell " + cell + "Cell mass: " + cell.mass);
+    if (cell && cell.mass >= Config.defaultPlayerMass * 2) {
+    cell.mass = cell.mass / 2;
+    cell.radius = Util.massToRadius(cell.mass);
+    new Cell(this, cell.x, cell.y, cell.mass, 25, cell.hue);
+    }
+  };
+
+  splitAllCells() {
+    if (this.cells.length < Config.limitSplit && this.mass >= Config.defaultPlayerMass * 2) {
+      this.cells.forEach((c) => this.splitCell(c));
+    }
+  };
+
   onCellDied(deadCell) {
     // iterate the list of cells and find the dead cell
     for (let index = 0; index < this.cells.length; ++index) {
