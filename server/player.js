@@ -109,7 +109,7 @@ class Player {
     if (cell && cell.mass >= Config.defaultPlayerMass * 2) {
     cell.mass = cell.mass / 2;
     cell.radius = Util.massToRadius(cell.mass);
-    new Cell(this, cell.x, cell.y, cell.mass, 25, cell.hue);
+    this.cells.push(new Cell(this, cell.x, cell.y, cell.mass, 25, cell.hue));
     }
   };
 
