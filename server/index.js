@@ -51,7 +51,6 @@ const V = SAT.Vector;
 const C = SAT.Circle;
 
 /*
-
 function addBot(add) {
   let toAdd = add;
   while (toAdd--) {
@@ -65,8 +64,6 @@ function addBot(add) {
     bots.push(bot);
   }
 }
-
-
 */
 
 function balanceMass() {
