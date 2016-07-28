@@ -45,6 +45,15 @@ class Cell extends GameObject {
     this.player.onCellDied(this);
   }
 
+  splitCell() {
+    let mass = this.mass
+    if (this && mass >= Config.defaultPlayerMass * 2) {
+    this.mass = mass / 2;
+    this.radius = Util.massToRadius(this.mass);
+    this.player.cells.push(new Cell(this.player, this.x, this.y, this.mass, 25, this.hue));
+    }
+  };
+
   move(target) {
     let x = 0;
     let y = 0;

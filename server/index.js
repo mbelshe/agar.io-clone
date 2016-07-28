@@ -299,20 +299,8 @@ io.on("connection", (socket) => {
     if (!currentPlayer) {
       return;
     }
-   // console.log("currentPlayer is true");
-    if (currentPlayer.canSplit()) {
-      // Split single cell from virus
-     // console.log("Player can split");
-      if (virusCellIndex >= 0) {
-      //  console.log("Splitting a cell");
-        currentPlayer.splitCell(currentPlayer.cells[virusCellIndex]);
-      } else {
-        // Split all cells
-      //  console.log("Splitting all cells");
-        currentPlayer.splitAllCells();
-      }
-      currentPlayer.lastSplit = new Date().getTime();
-    }
+    currentPlayer.splitAllCells();
+    currentPlayer.lastSplit = new Date().getTime();
   });
 });
 
@@ -382,7 +370,6 @@ function tickPlayer(player) {
         console.log("EATING/Split " + object.type + ': ' + object.id);
 
         // Shouldn't the eat() method automatically take care of the mass changes?
-        //TODO: Add virus(splitCell) implementation here
         if (object.type == 'food') {
           object.eat();
           cell.mass += object.mass;
@@ -390,7 +377,11 @@ function tickPlayer(player) {
           cell.mass += object.mass;
           object.die();
         } else if (object.type == 'virus') {
-          player.socket.emit(GameEvents.virusSplit, cellIndex);
+            if (player.canSplit()) {
+              if(cellIndex >= 0) {
+                cell.splitCell();
+              }
+            }
         } 
       
         player.socket.emit(GameEvents.playerScore, player.mass);

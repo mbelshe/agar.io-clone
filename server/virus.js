@@ -17,7 +17,6 @@ class Virus extends GameObject {
     		const mass = 15; //TODO: For testing
     		const radius = Util.massToRadius(mass);
     		const position = Util.uniformPosition(Config.gameBoard.objects, radius);
-  
     		new Virus(position.x, position.y, mass, radius);
     	}
     };
@@ -25,7 +24,6 @@ class Virus extends GameObject {
 	constructor(x, y, mass, radius) {
 		super('V' + virusCount++);
 		this.type = 'virus';
-
 		this.x = x;
 		this.y = y;
 		this.mass = mass;
