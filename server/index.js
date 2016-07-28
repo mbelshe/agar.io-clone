@@ -51,25 +51,6 @@ const V = SAT.Vector;
 const C = SAT.Circle;
 
 /*
-function addVirus(add) {
-  let toAdd = add;
-  while (toAdd--) {
-    const mass = Util.randomInRange(Config.virus.defaultMass.from, Config.virus.defaultMass.to, true);
-    const radius = Util.massToRadius(mass);
-    const position = Config.virusUniformDisposition ? Util.uniformPosition(virus, radius) : Util.randomPosition(radius);
-    virus.push({
-      id: ((new Date()).getTime() + '' + virus.length) >>> 0,
-      x: position.x,
-      y: position.y,
-      radius: radius,
-      mass: mass,
-      fill: Config.virus.fill,
-      stroke: Config.virus.stroke,
-      strokeWidth: Config.virus.strokeWidth
-    });
-  }
-}
-
 function addBot(add) {
   let toAdd = add;
   while (toAdd--) {
@@ -81,38 +62,6 @@ function addBot(add) {
     bot.target.directionX = 'left' || 'right';
     bot.target.directionY = 'up' || 'down';
     bots.push(bot);
-  }
-}
-
-function moveMass(mass) {
-  const deg = Math.atan2(mass.target.y, mass.target.x);
-  const deltaY = mass.speed * Math.sin(deg);
-  const deltaX = mass.speed * Math.cos(deg);
-
-  mass.speed -= 0.5;
-  if (mass.speed < 0) {
-    mass.speed = 0;
-  }
-  if (!isNaN(deltaY)) {
-    mass.y += deltaY;
-  }
-  if (!isNaN(deltaX)) {
-    mass.x += deltaX;
-  }
-
-  const borderCalc = mass.radius + 5;
-
-  if (mass.x > Config.gameWidth - borderCalc) {
-    mass.x = Config.gameWidth - borderCalc;
-  }
-  if (mass.y > Config.gameHeight - borderCalc) {
-    mass.y = Config.gameHeight - borderCalc;
-  }
-  if (mass.x < borderCalc) {
-    mass.x = borderCalc;
-  }
-  if (mass.y < borderCalc) {
-    mass.y = borderCalc;
   }
 }
 */
@@ -549,11 +498,6 @@ function moveLoop() {
       tickPlayer(allPlayers[key]);
     }
   });
-
-  /*
-  massFood.filter(m => m.speed > 0)
-    .forEach(m => moveMass(m));
-  */
 }
 
 function gameLoop() {
