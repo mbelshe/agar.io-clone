@@ -105,20 +105,21 @@ class Player {
   };
 
   splitAllCells() {
-    if (this.cells.length < Config.limitSplit && this.mass >= Config.defaultPlayerMass * 2) {
-      this.cells.forEach((c) => this.splitCell(c));
+    if (this.canSplit()) {
+      this.cells.forEach((cell) => cell.split());
     }
   };
-   
+
   onCellDied(deadCell) {
     // iterate the list of cells and find the dead cell
     for (let index = 0; index < this.cells.length; ++index) {
       if (this.cells[index].id == deadCell.id) {
         this.cells.splice(index, 1);
         break;
-      }}
+      }
+    }
 
-        if (this.cells.length == 0) {
+    if (this.cells.length == 0) {
       // Remove from global counters and set mass to zero.
       totalCount--;
       this.mass = 0;
@@ -153,7 +154,7 @@ class Player {
     let x = 0;
     let y = 0;
 
-    this.cells.forEach((cell, i) => {
+    this.cells.forEach((cell) => {
       const target = {
         x: this.x - cell.x + this.target.x,
         y: this.y - cell.y + this.target.y,
@@ -161,53 +162,57 @@ class Player {
 
       cell.move(target);
 
-      // Find best solution.
-      this.cells.forEach((c, j) => {
-        if (j !== i && cell !== undefined) {
-          const distance = Math.sqrt(Math.pow(c.y - cell.y, 2) + Math.pow(c.x - cell.x, 2));
-          const radiusTotal = (cell.radius + c.radius);
-          if (distance < radiusTotal) {
-            if (this.lastSplit > new Date().getTime() - 1000 * Config.mergeTimer) {
-              if (cell.x < c.x) {
-                cell.x--;
-              } else if (cell.x > c.x) {
-                cell.x++;
-              }
-              if (cell.y < c.y) {
-                cell.y--;
-              } else if ((cell.y > c.y)) {
-                cell.y++;
-              }
-            } else if (distance < radiusTotal / 1.75) {
-              cell.mass += c.mass;
-              cell.radius = Util.massToRadius(cell.mass);
-              this.cells.splice(j, 1);
-            }
-          }
-        }
-      });
-      if (this.cells.length > i) {
-        const borderCalc = cell.radius / 3;
-        if (cell.x > Config.gameWidth - borderCalc) {
-          cell.x = Config.gameWidth - borderCalc;
-        }
-        if (cell.y > Config.gameHeight - borderCalc) {
-          cell.y = Config.gameHeight - borderCalc;
-        }
-        if (cell.x < borderCalc) {
-          cell.x = borderCalc;
-        }
-        if (cell.y < borderCalc) {
-          cell.y = borderCalc;
-        }
-        x += cell.x;
-        y += cell.y;
-      }
+      x += cell.x;
+      y += cell.y;
     });
 
+    // Set player position to the middle of the cell group.
     var newPosition = { x: x / this.cells.length, y: y / this.cells.length };
     this.x = newPosition.x;
     this.y = newPosition.y;
+
+    this.mergeCells();
+  };
+
+  mergeCells() {
+    // Iterate all cells and see if any should merge.
+    for (let i = 0; i < this.cells.length; i++) {
+      let cell1 = this.cells[i];
+      
+      for (let j = 0; j < this.cells.length; j++) {
+        let cell2 = this.cells[j];
+        if (j !== i) {
+          const distance = Math.sqrt(Math.pow(cell2.y - cell1.y, 2) + Math.pow(cell2.x - cell1.x, 2));
+          const radiusTotal = (cell1.radius + cell2.radius);
+          if (distance < radiusTotal) {
+            if (cell2.lastSplit > new Date() - 1000 * Config.mergeTimer) {
+              let newPosition = { x: cell1.x, y: cell1.y };
+              if (cell1.x < cell2.x) {
+                newPosition.x--;
+              } else if (cell1.x > cell2.x) {
+                newPosition.x++;
+              }
+              if (cell1.y < cell2.y) {
+                newPosition.y--;
+              } else if ((cell1.y > cell2.y)) {
+                newPosition.y++;
+              }
+              Config.gameBoard.update(cell1, newPosition);
+              cell1.x = newPosition.x;
+              cell1.y = newPosition.y;
+            } else if (distance < radiusTotal / 1.75) {
+              cell1.mass += cell2.mass;
+              cell1.radius = Util.massToRadius(cell1.mass);
+              cell2.die();
+              // cell2.die() can modify the cells array.
+              // so we need to break out here.  We can merge more cells
+              // on the next iteration.
+              return;
+            }
+          }
+        }
+      }
+    }
   };
 
   // Return the client's representation of the Player object

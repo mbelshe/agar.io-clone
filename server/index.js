@@ -249,7 +249,6 @@ io.on("connection", (socket) => {
       return;
     }
     currentPlayer.splitAllCells();
-    currentPlayer.lastSplit = new Date().getTime();
   });
 });
 
@@ -322,13 +321,13 @@ function tickPlayer(player) {
         if (object.type == 'food') {
           object.eat();
           cell.mass += object.mass;
-        } else if (object.type == 'cell') {
+        } else if (object.type == 'cell' && object.player.id != player.id) {
           cell.mass += object.mass;
           object.die();
         } else if (object.type == 'virus') {
             if (player.canSplit()) {
               if(cellIndex >= 0) {
-                cell.splitCell();
+                cell.split();
               }
             }
         } 

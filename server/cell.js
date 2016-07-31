@@ -45,12 +45,18 @@ class Cell extends GameObject {
     this.player.onCellDied(this);
   }
 
-  splitCell() {
-    let mass = this.mass
-    if (this && mass >= Config.defaultPlayerMass * 2) {
-    this.mass = mass / 2;
-    this.radius = Util.massToRadius(this.mass);
-    this.player.cells.push(new Cell(this.player, this.x, this.y, this.mass, 25, this.hue));
+  canSplit() {
+    return this.mass >= Config.defaultPlayerMass * 2;
+  };
+
+  split() {
+    if (this.canSplit()) {
+      let mass = this.mass;
+      this.mass = mass / 2;
+      this.radius = Util.massToRadius(this.mass);
+      let newCell = new Cell(this.player, this.x, this.y, this.mass, 25, this.hue);
+      newCell.lastSplit = this.lastSplit = new Date();
+      this.player.cells.push(newCell);
     }
   };
 
@@ -82,6 +88,21 @@ class Cell extends GameObject {
     if (!isNaN(deltaX)) {
       newPosition.x = this.x + deltaX;
     }
+
+    const borderCalc = this.radius / 3;
+    if (newPosition.x > Config.gameWidth - borderCalc) {
+      newPosition.x = Config.gameWidth - borderCalc;
+    }
+    if (newPosition.y > Config.gameHeight - borderCalc) {
+      newPosition.y = Config.gameHeight - borderCalc;
+    }
+    if (newPosition.x < borderCalc) {
+      newPosition.x = borderCalc;
+    }
+    if (newPosition.y < borderCalc) {
+      newPosition.y = borderCalc;
+    }
+
     Config.gameBoard.update(this, newPosition);
     this.x = newPosition.x;
     this.y = newPosition.y;
