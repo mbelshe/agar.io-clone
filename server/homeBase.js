@@ -23,9 +23,5 @@ class HomeBase extends GameObject {
 	//	this.strokeWidth = ;
 		Config.gameBoard.insert(this);
 	}
-
-
-
-
 };
 export default HomeBase;
