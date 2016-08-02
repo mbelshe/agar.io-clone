@@ -12,6 +12,7 @@ import Virus from './virus';
 import GameBoard from './gameBoard';
 import GameEvents from './gameEvents.js';
 import GameObjectType from './gameObjectType.js';
+import HomeBase from './homeBase';
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
 const app = express();
@@ -91,6 +92,7 @@ function balanceMass() {
     Virus.addVirus(virusToAdd);
   }
 
+  HomeBase.addHomeBase();
 /*
   if (Config.bots.active) {
     const botToAdd = Config.bots.maxBot - bots.length;

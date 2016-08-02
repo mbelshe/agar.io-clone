@@ -6,6 +6,7 @@ import virusImage from '../img/virus.png';
 import '../audio/spawn.mp3';
 import '../audio/split.mp3';
 import GameEvents from '../../server/gameEvents.js';
+import homeBaseImage from '../img/homeBase.png';
 
 import io from 'socket.io-client';
 
@@ -422,6 +423,12 @@ function drawVirus(virus) {
   graph.drawImage(img, virus.x - player.x - virus.radius + screenWidth / 2, virus.y - player.y - virus.radius + screenHeight / 2, virus.radius * 2, virus.radius * 2);
 }
 
+function drawHomeBase(homeBase) {
+  const img = new Image();
+  img.src = homeBaseImage;
+  graph.drawImage(img, homeBase.x - player.x - homeBase.radius + screenWidth / 2, homeBase.y - player.y - homeBase.radius + screenHeight / 2, homeBase.radius * 2, homeBase.radius * 2);
+}
+
 function drawBots(bot) {
   graph.strokeStyle = `hsl(${bot.hue}, 100%, 45%)`;
   graph.fillStyle = `hsl(${bot.hue}, 100%, 50%)`;
@@ -540,6 +547,8 @@ function drawGameObject(obj) {
     drawFood(obj);
   } else if (obj.type == 'virus') {
     drawVirus(obj);
+  } else if (obj.type == 'homeBase') {
+    drawHomeBase(obj);
   }
 }
 

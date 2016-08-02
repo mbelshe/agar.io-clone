@@ -20,6 +20,9 @@
     "maxBot": 5,
     "speed": 50
   },
+  "homeBase" : {
+    "fill": "#0000FF"
+  },
   "gameWidth": 5000,
   "gameHeight": 5000,
   "adminPass": "DEFAULT",
