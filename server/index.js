@@ -51,6 +51,7 @@ Config.gameBoard = new GameBoard();
 const V = SAT.Vector;
 const C = SAT.Circle;
 
+HomeBase.addHomeBase();
 /*
 function addBot(add) {
   let toAdd = add;
@@ -92,7 +93,6 @@ function balanceMass() {
     Virus.addVirus(virusToAdd);
   }
 
-  HomeBase.addHomeBase();
 /*
   if (Config.bots.active) {
     const botToAdd = Config.bots.maxBot - bots.length;
@@ -314,6 +314,12 @@ function tickPlayer(player) {
       if (!isCollision) {
         return;
       }
+      
+      if(object.type == 'homeBase') {
+       //cash out
+        
+      }
+    
 
       if (cell.mass > object.mass * 1.1  &&
           cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.1) {
