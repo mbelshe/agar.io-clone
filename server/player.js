@@ -202,6 +202,7 @@ class Player {
               cell1.y = newPosition.y;
             } else if (distance < radiusTotal / 1.75) {
               cell1.mass += cell2.mass;
+              this.mass -= cell2.mass;
               cell1.radius = Util.massToRadius(cell1.mass);
               cell2.die();
               // cell2.die() can modify the cells array.
