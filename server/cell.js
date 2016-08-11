@@ -51,9 +51,7 @@ class Cell extends GameObject {
 
   split() {
     if (this.canSplit()) {
-      let mass = this.mass;
-      this.mass = mass / 2;
-      this.radius = Util.massToRadius(this.mass);
+      this.mass = this.mass / 2;
       let newCell = new Cell(this.player, this.x, this.y, this.mass, 25, this.hue);
       newCell.lastSplit = this.lastSplit = new Date();
       this.player.cells.push(newCell);
