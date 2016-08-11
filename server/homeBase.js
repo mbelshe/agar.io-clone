@@ -7,7 +7,6 @@ import GameObject from './gameObject';
 class HomeBase extends GameObject {
 	static addHomeBase() {
 			const mass = Util.randomInRange(Config.virus.defaultMass.from, Config.virus.defaultMass.to, true);
-		//    const mass = 90;
     		const radius = Util.massToRadius(mass);
     		const position = Util.uniformPosition(Config.gameBoard.objects, radius);
     		console.log("HomeBase x: " + position.x + ", y: " + position.y);
