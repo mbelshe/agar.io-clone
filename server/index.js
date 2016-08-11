@@ -323,15 +323,15 @@ function tickPlayer(player) {
 
       if (cell.mass > object.mass * 1.1  &&
           cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.1) {
-        console.log("EATING/Split " + object.type + ': ' + object.id);
-
+        //console.log("EATING/Split " + object.type + ': ' + object.id);
         // Shouldn't the eat() method automatically take care of the mass changes?
+        console.log("Type: " + object.type);
         if (object.type == 'food') {
           object.eat();
           cell.mass += object.mass;
         } else if (object.type == 'cell' && object.player.id != player.id) {
-          cell.mass += object.mass;
-          object.die();
+            cell.mass += object.mass;
+            object.die(); 
         } else if (object.type == 'virus') {
             if (player.canSplit()) {
               if(cellIndex >= 0) {
@@ -339,7 +339,7 @@ function tickPlayer(player) {
               }
             }
         } 
-      
+        
         player.socket.emit(GameEvents.playerScore, player.mass);
         
 //console.log("ATE: " + object.mass + ", player is now: " + player.mass);
