@@ -13,7 +13,7 @@ class Virus extends GameObject {
 
     static addVirus(virusToAdd) {
     	while(virusToAdd--) {
-    	  const mass = Util.randomInRange(Config.virus.defaultMass.from, Config.virus.defaultMass.to, true);
+        const mass = Util.randomInRange(Config.virus.defaultMass.from, Config.virus.defaultMass.to, true);
     		const radius = Util.massToRadius(mass);
     		const position = Util.uniformPosition(Config.gameBoard.objects, radius);
     		new Virus(position.x, position.y, mass, radius);

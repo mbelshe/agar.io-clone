@@ -317,7 +317,6 @@ function tickPlayer(player) {
       
       if(object.type == 'homeBase') {
        //cash out
-        
       }
     
 
@@ -325,7 +324,6 @@ function tickPlayer(player) {
           cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.1) {
         //console.log("EATING/Split " + object.type + ': ' + object.id);
         // Shouldn't the eat() method automatically take care of the mass changes?
-        console.log("Type: " + object.type);
         if (object.type == 'food') {
           object.eat();
           cell.mass += object.mass;
