@@ -274,7 +274,6 @@ function setupSocket() {
     chat.addSystemLine(`{GAME} - <b>${(data.name.length < 1 ? 'An unnamed cell' : data.name)}</b> joined.`);
   });
 
- // socket.on('leaderboard', (data) => {
   socket.on(GameEvents.leaderboard , (data) => {
     leaderboard = data.leaderboard;
     let status = '<span class="title">Leaderboard</span>';
@@ -536,9 +535,6 @@ function drawCell(cell) {
 // drawGameObject
 // Draw's a single game object based on type.  In the future we can make this more object oriented.
 function drawGameObject(obj) {
-  //console.log('drawGameObject');
-  //console.dir(obj);
-
   if (obj.type == 'player') {
     //drawPlayer(obj);
   } else if (obj.type == 'cell') {
@@ -605,10 +601,6 @@ function gameLoop() {
     if (gameStart) {
       graph.clearRect(0, 0, screenWidth, screenHeight);
       document.body.style.backgroundPosition = `${xoffset - player.x}px ${yoffset - player.y}px`;
-      //foods.forEach(drawFood);
-      //fireFood.forEach(drawFireFood);
-      //viruses.forEach(drawVirus);
-      //bots.forEach(drawBots);
 
       if (borderDraw) {
         drawborder();
@@ -617,28 +609,10 @@ function gameLoop() {
       gameObjects.sort(function(obj1, obj2) {
         return obj1.mass - obj2.mass;
       });
-      
-      
+  
       gameObjects.forEach(drawGameObject);
       
-/*
-      // Sort the users in order to display larger users "on top" of smaller users as they get eaten
-      const orderMass = [];
-      for (let i = 0; i < users.length; i++) {
-        for (let j = 0; j < users[i].cells.length; j++) {
-          orderMass.push({
-            nCell: i,
-            nDiv: j,
-            mass: users[i].cells[j].mass
-          });
-        }
-      }
-      orderMass.sort((obj1, obj2) => {
-        return obj1.mass - obj2.mass;
-      });
-      drawPlayers(orderMass);
-*/
-      socket.emit(GameEvents.heartbeat, target); // playerSendTarget "Heartbeat".
+      socket.emit(GameEvents.heartbeat, target);
     } else {
     	graph.fillStyle = '#333333';
 		graph.fillRect(0, 0, screenWidth, screenHeight);

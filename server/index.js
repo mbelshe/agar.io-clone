@@ -104,7 +104,6 @@ function balanceMass() {
 }
 
 io.on("connection", (socket) => {
- // console.log('A user connected!', socket.handshake.query.type);
 
   let currentPlayer;
 
@@ -316,14 +315,13 @@ function tickPlayer(player) {
       }
       
       if(object.type == 'homeBase') {
-       //cash out
+       //TODO: cash out
       }
     
 
       if (cell.mass > object.mass * 1.1  &&
           cell.radius > Math.sqrt(Math.pow(cell.x - object.x, 2) + Math.pow(cell.y - object.y, 2)) * 1.1) {
-        //console.log("EATING/Split " + object.type + ': ' + object.id);
-        // Shouldn't the eat() method automatically take care of the mass changes?
+        
         if (object.type == 'food') {
           object.eat();
           cell.mass += object.mass;
@@ -355,135 +353,7 @@ function tickPlayer(player) {
     food.splice(f, 1);
   }
 
-  function collisionCheck(collision) {
-    if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2)) * 1.75) {
-      console.log(`[DEBUG] Killing user: ${collision.bUser.id}`);
-      console.log('[DEBUG] Collision info:');
-
-      const botCheck = Util.findIndex(bots, collision.bUser.id);
-      const userCheck = Util.findIndex(users, collision.bUser.id);
-      const numUser = userCheck > -1 ? userCheck : botCheck;
-      if (numUser > -1) {
-        if (collision.bUser.type === 'bot') {
-          bots.splice(numUser, 1);
-        } else {
-          if (users[numUser].cells.length > 1) {
-            users[numUser].massTotal -= collision.bUser.mass;
-            users[numUser].cells.splice(collision.bUser.num, 1);
-          } else {
-            users.splice(numUser, 1);
-            io.emit('playerDied', { name: collision.bUser.name });
-            collision.bUser.socket.emit('RIP');
-          }
-        }
-
-        currentPlayer.massTotal += collision.bUser.mass;
-        collision.aUser.mass += collision.bUser.mass;
-      }
-    }
-  }
-
-  let playerCircle = {};
-  let currentCell = {};
-  const playerCollisions = [];
-
-  function check(user) {
-    user.cells.forEach((c, i) => {
-      //if ( user.cells[i].mass > 10 && user.id !== currentPlayer.id) {
-      if (user.id !== currentPlayer.id) {
-        const response = new SAT.Response();
-        const collided = SAT.testCircleCircle(playerCircle,
-          new C(new V(c.x, c.y), c.radius),
-          response);
-        if (collided) {
-          response.aUser = currentCell;
-          response.bUser = {
-            id: user.id,
-            name: user.name,
-            x: c.x,
-            y: c.y,
-            num: i,
-            type: user.type,
-            mass: c.mass
-          };
-          playerCollisions.push(response);
-        }
-      }
-    });
-    return true;
-  }
-
-  function eatMass(m) {
-    if (SAT.pointInCircle(new V(m.x, m.y), playerCircle)) {
-      if (m.id === currentPlayer.id && m.speed > 0 && z === m.num) {
-        return false;
-      }
-      if (currentCell.mass > m.masa * 1.1) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function funcFood(f) {
-    return SAT.pointInCircle(new V(f.x, f.y), playerCircle);
-  }
-
-  // TODO: FIX THIS Z VARIABLE AND EATMASS()
-  for (z = 0; z < currentPlayer.cells.length; z++) {
-    currentCell = currentPlayer.cells[z];
-    playerCircle = new C(
-      new V(currentCell.x, currentCell.y),
-      currentCell.radius
-    );
-
-    const foodEaten = food.map(funcFood)
-      .reduce((a, b, c) => { return b ? a.concat(c) : a; }, []);
-
-    foodEaten.forEach(deleteFood);
-    const massEaten = massFood.map(eatMass)
-      .reduce((a, b, c) => {return b ? a.concat(c) : a; }, []);
-
-    const virusCollision = virus.map(funcFood)
-      .reduce((a, b, c) => { return b ? a.concat(c) : a; }, []);
-
-    if (virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) {
-      currentPlayer.socket.emit('virusSplit', z);
-    }
-
-    let masaGanada = 0;
-    for (let m = 0; m < massEaten.length; m++) {
-      masaGanada += massFood[massEaten[m]].masa;
-      massFood[massEaten[m]] = {};
-      massFood.splice(massEaten[m], 1);
-      for (let n = 0; n < massEaten.length; n++) {
-        if (massEaten[m] < massEaten[n]) {
-          massEaten[n]--;
-        }
-      }
-    }
-
-    if (typeof(currentCell.speed) === 'undefined') {
-      currentCell.speed = 6.25;
-    }
-
-    masaGanada += (foodEaten.length * Config.foodMass);
-    if (masaGanada > 0) {
-      currentPlayer.score += masaGanada;
-      currentCell.mass += masaGanada;
-      currentPlayer.massTotal += masaGanada;
-    }
-    currentPlayer.socket.emit('playerScore', currentPlayer.score);
-    currentCell.radius = Util.massToRadius(currentCell.mass);
-    playerCircle.r = currentCell.radius;
-
-    users.forEach(sqt.put);
-    bots.forEach(sqt.put);
-    // TODO: TEST TO MAKE SURE PLAYER COLLISSIONS WORK
-    sqt.get(currentPlayer, check);
-    playerCollisions.forEach(collisionCheck);
-  }
-*/
+  
 }
 
 function moveLoop() {
