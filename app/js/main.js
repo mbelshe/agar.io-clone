@@ -6,7 +6,7 @@ import virusImage from '../img/virus.png';
 import '../audio/spawn.mp3';
 import '../audio/split.mp3';
 import GameEvents from '../../server/gameEvents.js';
-import homeBaseImage from '../img/homeBase.png';
+import homeBaseImage from '../img/homeBase2.png';
 
 import io from 'socket.io-client';
 
