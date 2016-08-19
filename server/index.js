@@ -355,7 +355,8 @@ function tickPlayer(player) {
 
   
 }
-
+*/
+}
 function moveLoop() {
   let allPlayers = Player.players;
   Object.keys(allPlayers).forEach(function(key) {
