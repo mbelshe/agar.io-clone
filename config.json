@@ -36,5 +36,13 @@
   "massLossRate": 1,
   "minMassLoss": 50,
   "mergeTimer": 15,
-  "initialSpeed": 6.25
+  "initialSpeed": 6.25,
+  "isProduction": false,
+  "BitGoConfig": {
+     "useProduction" : false,
+     "authEnv" : "test"
+  },
+  "amountForKill": 0.000001,
+  "serverBitGoUser": "foobar",
+  "serverBitGoPassword": "asdfasdf"
 }

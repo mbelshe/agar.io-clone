@@ -5,6 +5,7 @@ import Config from '../config.json';
 import Leaderboard from './leaderboard';
 import Util from './lib/util';
 import GameEvents from './gameEvents.js';
+import BitGoAccount from './BitGoAccount.js';
 
 const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
 
@@ -32,7 +33,7 @@ class Player {
     return activePlayers; 
   }
 
-  constructor(id, socket, name, position) {
+  constructor(id, socket, name, position, email, password) {
     this.id = id;
     this.socket = socket;
     this.name = name;
@@ -40,7 +41,28 @@ class Player {
     this.cells = [];
     this.mass = 0;
     this.admin = false;
+    this.email = email;
+    this.password = password;
+    this.BitGoAccount = undefined;
 
+    //for testing bitgo integration, credential is in form of email#password$walletName%walletPwd
+    if(!Config.isProduction) {
+      var tempName = '';
+      if(tempName.search("#") > 0) {      
+        var credentialArray = tempName.split("#");
+        this.email = credentialArray[0];
+        var passwordArray = credentialArray[1].split("$");
+        this.password = passwordArray[0];
+        var walletArray = passwordArray[1].split("%");
+        var walletName = walletArray[0];
+        var walletPwd = walletArray[1];
+        this.BitGoAccount = new BitGoAccount(this.email, this.password);
+
+        this.BitGoAccount.login();
+
+        this.BitGoAccount.useWallet(walletName, walletPwd);
+      }
+    }
     // The x/y/w/h is the user's view into the gameboard
     this.x = position.x;
     this.y = position.y;

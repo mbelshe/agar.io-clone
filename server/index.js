@@ -151,7 +151,7 @@ io.on("connection", (socket) => {
 
     let radius = Util.massToRadius(Config.defaultPlayerMass);
     let position = Util.uniformPosition(Config.gameBoard.objects, radius);
-    currentPlayer = new Player(socket.id, socket, name, position);
+    currentPlayer = new Player(socket.id, socket, name, position, '', '');
     socket.emit(GameEvents.welcome, currentPlayer);
     console.log(`[INFO] User ${currentPlayer.name} respawned!`);
   });
@@ -384,6 +384,13 @@ function gameLoop() {
 */
 
   balanceMass();
+}
+
+function processPayment(livingPlayer, deadPlayer) {
+  if(livingPlayer.BitGoAccount != undefined && deadPlayer.BitGoAccount != undefined) {
+    var amount = Config.amountForKill;
+    deadPlayer.BitGoAcount.transfer(amount, livingPlayer.BitGoAcount, )
+  } 
 }
 
 function sendUpdates() {

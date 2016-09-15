@@ -21,7 +21,7 @@ describe('player.js', function() {
     });  
 
     it('should create a new player', function () {
-      player = new Player(1, undefined, 'aniketh', {x: 0, y: 0});
+      player = new Player(1, undefined, 'aniketh', {x: 0, y: 0}, "", "");
       expect(player).to.not.be.undefined;
       expect(Player.count).to.be.eq(1);
       expect(Player.mass).to.be.eq(0);
@@ -30,7 +30,7 @@ describe('player.js', function() {
     });
     
     it('should return the totalPlayerMass for two players', function() {
-      let player2 = new Player(2, undefined, 'mike', {x: 0, y: 0});
+      let player2 = new Player(2, undefined, 'mike', {x: 0, y: 0}, "", "");
       player2.spawn();
       expect(Player.mass).to.be.eq(2 * Config.defaultPlayerMass);
       player2.die();
@@ -79,7 +79,7 @@ describe('player.js', function() {
   describe('Leaderboard', function() {
     let player;
     it('should get leaderboard',function() {
-      player = new Player(3, undefined, 'leader', {x: 0, y: 0});
+      player = new Player(3, undefined, 'leader', {x: 0, y: 0},"","");
       player.spawn();
       let leaderboard = Player.leaderboard.leaders;
       expect(leaderboard.length).to.be.eq(1);
@@ -87,7 +87,7 @@ describe('player.js', function() {
     });
 
     it('should get two players in leaderboard',function() {
-      let player2 = new Player(4, undefined, 'leader', {x: 0, y: 0});
+      let player2 = new Player(4, undefined, 'leader', {x: 0, y: 0},"","");
       player2.spawn();
       let leaderboard = Player.leaderboard.leaders;
       expect(leaderboard.length).to.be.eq(2);
@@ -97,7 +97,7 @@ describe('player.js', function() {
     });
 
     it('should insert new leader', function() {
-      let player3 = new Player(5, undefined, 'leader', {x: 0, y: 0});
+      let player3 = new Player(5, undefined, 'leader', {x: 0, y: 0},"","");
       player3.mass = 100;
       let leaderboard = Player.leaderboard.leaders;
       expect(leaderboard.length).to.be.eq(3);
@@ -107,7 +107,7 @@ describe('player.js', function() {
     it('should max out leaderboard', function() {
       let players = [];
       for (var index = 0; index < 20; ++index) {
-        let player = new Player(100 + index, undefined, 'leader', {x: 0, y: 0});
+        let player = new Player(100 + index, undefined, 'leader', {x: 0, y: 0},"","");
         player.spawn();
         player.mass = 1000 + index;
         let leaderboard = Player.leaderboard.leaders;
@@ -131,7 +131,7 @@ describe('player.js', function() {
     });
 
     it('should be dirty after insert', function() {
-      new Player(55, undefined, 'leader', {x: 0, y: 0});
+      new Player(55, undefined, 'leader', {x: 0, y: 0},"","");
       expect(Player.leaderboard.dirty).to.be.true;
     });
 
